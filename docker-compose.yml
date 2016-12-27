@@ -1,0 +1,24 @@
+version: "2"
+
+services:
+  mongodatabase:
+    image: microservices/mongodatabase:latest
+    volumes:
+     - /data/db:/data/db
+    restart: always
+
+  mongodatabaseproxy:
+    image: microservices/mongodatabaseproxy:latest
+    links:
+      - mongodatabase
+    restart: always
+
+  servicesmanagement:
+    image: microservices/servicesmanagement:latest
+    restart: always
+
+  restapi:
+    image: microservices/restapi:latest
+    ports:
+          - "8094:8094"
+    restart: always
