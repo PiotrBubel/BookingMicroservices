@@ -81,7 +81,7 @@
                         Cena usługi (PLN/h):
                     </div>
                     <div class="col-md-8">
-                        <input class="form-control" type="text" name="price" ng-model="newService.price" ng-required>
+                        <input class="form-control" type="number" name="price" ng-model="newService.price" ng-required>
                         <div ng-show="serviceForm.price.$error.required">Pole jest wymagane</div>
                     </div>
                 </div>
@@ -90,7 +90,7 @@
                         Sugerowany czas:
                     </div>
                     <div class="col-md-8">
-                        <input class="form-control" type="text" name="suggestedTime" ng-model="newService.suggestedTime" ng-required>
+                        <input class="form-control" type="number" name="suggestedTime" ng-model="newService.suggestedTime" ng-required>
                         <div ng-show="serviceForm.suggestedTime.$error.required">Pole jest wymagane</div>
                     </div>
                 </div>
