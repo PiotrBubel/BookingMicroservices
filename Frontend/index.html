@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Microservices</title>
+    <link rel="stylesheet" type="text/css" href="/assets/lib/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/styles.css">
+
+    <!--<link rel="stylesheet" type="text/css" href="/assets/lib/bootstrap/css/bootstrap-flex.min.css">-->
+    <!--<link rel="stylesheet" type="text/css" href="/assets/lib/bootstrap/css/bootstrap-grid.min.css">-->
+    <!--<link rel="stylesheet" type="text/css" href="/assets/lib/bootstrap/css/bootstrap-reboot.min.css">-->
+    <!--<link rel="stylesheet" type="text/css" href="css/login.css">-->
+    <!--<link rel="stylesheet" type="text/css" href="css/index.css">-->
+    <!--<link rel="stylesheet" type="text/css" href="css/lottery.css">-->
+    <!--<link rel="stylesheet" type="text/css" href="css/statistics.css">-->
+</head>
+<body>
+
+<div class="container" ng-controller="mainCtrl">
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <!--<a class="navbar-brand"><img src="images/logoAtos.png" alt="logoAtos"/></a>-->
+                <a class="navbar-brand" aria-selected="true" ng-href="/main">Booking Microservices</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li ng-show="userLoggedIn"><a ng-href="/services/">Usługi</a></li>
+                    <li ng-show="userLoggedIn"><a ng-href="/bookings">Rezerwacje</a></li>
+                    <li ng-show="userLoggedIn"><a ng-href="/statistics">Statystyki</a></li>
+                    <li ng-show="userLoggedIn"><a ng-href="/settings">Ustawienia</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li ng-show="userLoggedIn && UID"><a ng-href="/login" ng-click="logout()">{{ UID }} <i>(wyloguj)</i></a>
+                    </li>
+                    <li ng-hide="!userLoggedIn"><a ng-href="/login">Zaloguj</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+
+<div class="container" ng-view></div>
+
+<footer class="footer center-block">
+    <div class="container">
+        <p class="text-muted">Praca Inzynierska Piotr Bubel</p>
+    </div>
+</footer>
+
+<script src="/assets/lib/jquery.min.js"></script>
+<script src="/assets/lib/angular-1.5.6.min.js"></script>
+<script src="/assets/lib/angular-cookies.min.js"></script>
+<script src="/assets/lib/angular-animate.min.js"></script>
+<script src="/assets/lib/angular-material-1.1.1.min.js"></script>
+<script src="/assets/lib/angular-route.min.js"></script>
+<!--<script src="/assets/lib/bootstrap/js/ui-bootstrap-tpls-2.3.2.min.js"></script>-->
+<!--<script src="/assets/lib/angular-loader.min.js"></script>-->
+<!--<script src="/assets/lib/angular-message-format.min.js"></script>-->
+<!--<script src="/assets/lib/angular-messages.min.js"></script>-->
+<!--<script src="/assets/lib/angular-parse-ext.min.js"></script>-->
+<!--<script src="/assets/lib/angular-resource.min.js"></script>-->
+<!--<script src="/assets/lib/angular-sanitize.min.js"></script>-->
+<!--<script src="/assets/lib/angular-touch.min.js"></script>-->
+<script src="/assets/lib/bootstrap/js/bootstrap.min.js"></script>
+
+<script src="/app.js"></script>
+<script src="/app/app.routes.js"></script>
+<script src="/app/app.module.js"></script>
+<script src="/app/components/services/servicesController.js"></script>
+<!--<script src="../scripts/controllers.js"></script>-->
+<!--<script src="../scripts/services.js"></script>-->
+</body>
+</html>

@@ -11,6 +11,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class ServicesManagement extends AbstractVerticle {
 
@@ -75,6 +76,17 @@ public class ServicesManagement extends AbstractVerticle {
 
     private void getServiceDetails(Message<JsonObject> inMessage) {
         log.info("Called method GET_SERVICE_DETAILS with message body: " + inMessage.body());
+
+        if (inMessage.body() == null) {
+            log.error("Received GET_SERVICE_DETAILS command without json object");
+            inMessage.fail(400, "Received method call without JsonObject");
+            return;
+        } else if (!inMessage.body().containsKey("name")) {
+            log.error("Received GET_SERVICE_DETAILS command without service name");
+            inMessage.fail(400, "Received method call without valid JsonObject");
+            return;
+        }
+
         eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
                 new DeliveryOptions().setSendTimeout(2000).addHeader(METHOD_KEY, "GET_SERVICE_DETAILS"),
                 (AsyncResult<Message<JsonObject>> messageAsyncResult) -> {
@@ -86,10 +98,22 @@ public class ServicesManagement extends AbstractVerticle {
                 });
     }
 
-    // TODO check inMessage.body()
     private void saveNewService(Message<JsonObject> inMessage) {
         log.info("Called method SAVE_NEW_SERVICE with message body: " + inMessage.body());
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
+
+        if (!inMessage.body().containsKey("service")) {
+            inMessage.fail(400, "Bad Request");
+            return;
+        }
+        JsonObject newService = inMessage.body().getJsonObject("service");
+
+        if (!newService.containsKey("name") || !newService.containsKey("price") ||
+                StringUtils.isBlank(newService.getString("name"))) {
+            inMessage.fail(400, "Bad Request");
+            return;
+        }
+
+        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, newService,
                 new DeliveryOptions().setSendTimeout(2000).addHeader(METHOD_KEY, "SAVE_NEW_SERVICE"),
                 (AsyncResult<Message<JsonObject>> messageAsyncResult) -> {
                     if (messageAsyncResult.succeeded()) {
@@ -117,7 +141,7 @@ public class ServicesManagement extends AbstractVerticle {
         JsonArray array = new JsonArray();
         JsonArray given = object.getJsonArray("list");
         for (int i = 0; i < given.size(); i++) {
-            array.add(given.getJsonObject(i).getValue("serviceName"));
+            array.add(given.getJsonObject(i).getValue("name"));
         }
         return array;
     }

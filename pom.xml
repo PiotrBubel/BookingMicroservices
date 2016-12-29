@@ -13,5 +13,6 @@
         <module>MongoDatabaseProxy</module>
         <module>ServicesManagement</module>
         <module>RestApi</module>
+        <module>Frontend</module>
     </modules>
 </project>
