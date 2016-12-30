@@ -19,6 +19,7 @@ public class ServicesManagement extends AbstractVerticle {
     private static final String DATABASE_PROXY_SERVICE_ADDRESS = "pl.lodz.p.microservices.proxy.mongo.DatabaseProxyService";
 
     private static final String METHOD_KEY = "method";
+    private static final int TIMEOUT = 4000;
 
     private static final Logger log = LoggerFactory.getLogger(ServicesManagement.class);
 
@@ -63,7 +64,7 @@ public class ServicesManagement extends AbstractVerticle {
     private void getServicesList(Message<JsonObject> inMessage) {
         log.info("Called method GET_SERVICES_LIST");
         eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(2000).addHeader(METHOD_KEY, "GET_SERVICES_LIST"),
+                new DeliveryOptions().setSendTimeout(4000).addHeader(METHOD_KEY, "GET_SERVICES_LIST"),
                 (AsyncResult<Message<JsonObject>> messageAsyncResult) -> {
                     if (messageAsyncResult.succeeded()) {
                         JsonObject replyList = new JsonObject().put("list", jsonObjectToArray(messageAsyncResult.result().body()));
@@ -88,7 +89,7 @@ public class ServicesManagement extends AbstractVerticle {
         }
 
         eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(2000).addHeader(METHOD_KEY, "GET_SERVICE_DETAILS"),
+                new DeliveryOptions().setSendTimeout(4000).addHeader(METHOD_KEY, "GET_SERVICE_DETAILS"),
                 (AsyncResult<Message<JsonObject>> messageAsyncResult) -> {
                     if (messageAsyncResult.succeeded()) {
                         inMessage.reply(messageAsyncResult.result().body());
@@ -114,7 +115,7 @@ public class ServicesManagement extends AbstractVerticle {
         }
 
         eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, newService,
-                new DeliveryOptions().setSendTimeout(2000).addHeader(METHOD_KEY, "SAVE_NEW_SERVICE"),
+                new DeliveryOptions().setSendTimeout(4000).addHeader(METHOD_KEY, "SAVE_NEW_SERVICE"),
                 (AsyncResult<Message<JsonObject>> messageAsyncResult) -> {
                     if (messageAsyncResult.succeeded()) {
                         inMessage.reply(messageAsyncResult.result().body());
@@ -127,7 +128,7 @@ public class ServicesManagement extends AbstractVerticle {
     private void deleteService(Message<JsonObject> inMessage) {
         log.info("Called method DELETE_SERVICE with message body: " + inMessage.body());
         eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(2000).addHeader(METHOD_KEY, "DELETE_SERVICE"),
+                new DeliveryOptions().setSendTimeout(4000).addHeader(METHOD_KEY, "DELETE_SERVICE"),
                 (AsyncResult<Message<JsonObject>> messageAsyncResult) -> {
                     if (messageAsyncResult.succeeded()) {
                         inMessage.reply(messageAsyncResult.result().body());

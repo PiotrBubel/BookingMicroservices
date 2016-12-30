@@ -11,7 +11,11 @@ db.createCollection("Services", {
                 $type: "string",
                 $exists: true
             },
-            suggestedTime: {
+            minTime: {
+                $type: "int",
+                $exists: true
+            },
+            maxTime: {
                 $type: "int",
                 $exists: true
             },
@@ -165,29 +169,33 @@ print('* Inserted user into db');
 
 db.Services.insert({
     name: "usluga1",
-    suggestedTime: NumberInt(15),
+    minTime: NumberInt(15),
+    maxTime: NumberInt(30),
     price: NumberInt(15),
     description: "opis uslugi 1"
 });
 
 db.Services.insert({
     name: "usluga2",
-    suggestedTime: NumberInt(15),
+    minTime: NumberInt(15),
+    maxTime: NumberInt(30),
     price: NumberInt(15),
     description: "opis uslugi 2"
 });
 
 db.Services.insert({
     name: "usluga3",
-    suggestedTime: NumberInt(15),
-    price: NumberInt(15),
+    minTime: NumberInt(15),
+    maxTime: NumberInt(15),
+    price: NumberInt(30),
     description: "opis uslugi 3"
 });
 
 db.Services.insert({
     name: "usluga4",
-    suggestedTime: NumberInt(15),
-    price: NumberInt(15),
+    minTime: NumberInt(15),
+    maxTime: NumberInt(15),
+    price: NumberInt(60),
     description: "opis uslugi 4"
 });
 

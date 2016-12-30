@@ -5,7 +5,9 @@ import com.google.common.net.MediaType;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -110,26 +112,17 @@ public class ProxyService extends AbstractVerticle {
         eventBus.send(address, jsonMessage, options,
                 response -> {
                     if (!response.succeeded()) {
-                        log.info("Response not succeeded: " + response.cause().getMessage());
-                        respond(routingContext, 500, response.cause().getMessage());
+                        ReplyException cause = (ReplyException) response.cause();
+                        respond(routingContext, cause.failureCode(), cause.getMessage());
                         return;
                     }
-                    log.info("Response succeeded: " + response.result().body());
-
                     JsonObject jsonObject;
-
                     if (response.result().body().getClass().equals(JsonObject.class)) {
                     jsonObject = (JsonObject) response.result().body();
                     } else {
                         respond(routingContext, 500, "Internal server error. Server does not respond with application/json");
                         return;
                     }
-
-                    if (jsonObject.containsKey("error")) {
-                        respond(routingContext, 500, "Internal error. " + jsonObject.getString("error"));
-                        return;
-                    }
-
                     routingContext.response()
                             .putHeader("Content-Type", MediaType.JSON_UTF_8.toString())
                             .end(jsonObject.encodePrettily());
