@@ -1,15 +1,15 @@
 'use strict';
 
-myApp.controller("servicesController", function ($scope, $timeout, servicesFactory) {
+myApp.controller("usersController", function ($scope, $timeout, usersFactory) {
 
     $scope.createNew = true;
-    $scope.serviceData = {
+    $scope.userData = {
         description: '',
         price: 1,
         minTime: 1,
         maxTime: 2
     };
-    var clearData = angular.copy($scope.serviceData);
+    var clearData = angular.copy($scope.userData);
 
     var messageHandler = {};
     messageHandler.showErrorMessage = function (message, description) {
@@ -49,9 +49,9 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
     };
 
     var refreshList = function () {
-        servicesFactory.getList()
+        usersFactory.getList()
             .success(function (response) {
-                $scope.services = response.list;
+                $scope.users = response.list;
             })
             .error(function (error) {
                 messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
@@ -60,10 +60,10 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
     refreshList();
 
     $scope.changeSelected = function (name) {
-        servicesFactory.getDetails(name)
+        usersFactory.getDetails(name)
             .success(function (response) {
-                $scope.serviceData = response;
-                $scope.wholeDay = ($scope.serviceData.maxTime === 24 * 60) && ($scope.serviceData.minTime === $scope.serviceData.maxTime);
+                $scope.userData = response;
+                $scope.wholeDay = ($scope.userData.maxTime === 24 * 60) && ($scope.userData.minTime === $scope.userData.maxTime);
                 $scope.createNew = false;
             })
             .error(function (error) {
@@ -73,19 +73,19 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
 
     $scope.setNew = function () {
         $scope.createNew = true;
-        $scope.serviceData = angular.copy(clearData);
-        delete($scope.serviceData.name);
+        $scope.userData = angular.copy(clearData);
+        delete($scope.userData.name);
     };
 
-    $scope.saveNewService = function () {
-        console.log('$scope.serviceData', $scope.serviceData);
+    $scope.saveNewUser = function () {
+        console.log('$scope.userData', $scope.userData);
         if ($scope.wholeDay) {
-            $scope.serviceData.minTime = $scope.serviceData.maxTime = 60 * 24;
+            $scope.userData.minTime = $scope.userData.maxTime = 60 * 24;
         }
-        servicesFactory.create($scope.serviceData)
+        usersFactory.create($scope.userData)
             .success(function () {
                 messageHandler.showSuccessMessage('Dodano pomyślnie');
-                $scope.changeSelected($scope.serviceData.name);
+                $scope.changeSelected($scope.userData.name);
                 $scope.createNew = false;
                 refreshList();
             })
@@ -94,8 +94,8 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
             });
     };
 
-    $scope.removeService = function () {
-        servicesFactory.remove($scope.serviceData.name)
+    $scope.removeUser = function () {
+        usersFactory.remove($scope.userData.name)
             .success(function () {
                 messageHandler.showSuccessMessage('Usunięto pomyślnie');
                 refreshList();
@@ -106,25 +106,19 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
             });
     };
 
-    $scope.editService = function () {
-        var newData = angular.copy($scope.serviceData);
+    $scope.editUser = function () {
+        var newData = angular.copy($scope.userData);
         delete(newData.name);
-        servicesFactory.edit($scope.serviceData.name, newData)
+        usersFactory.edit($scope.userData.name, newData)
             .success(function () {
                 messageHandler.showSuccessMessage('Edytowano pomyślnie');
                 refreshList();
-                $scope.changeSelected($scope.serviceData.name);
+                $scope.changeSelected($scope.userData.name);
             })
             .error(function (error) {
                 messageHandler.showErrorMessage('Błąd ', error.message);
             });
     };
-
-    $scope.$watch('serviceData.maxTime + serviceData.minTime', function (newValue, oldValue) {
-        if (!angular.equals(newValue, oldValue)) {
-            $scope.wholeDay = ($scope.serviceData.maxTime === 24 * 60) && ($scope.serviceData.minTime === $scope.serviceData.maxTime);
-        }
-    });
 
     $scope.exists = function (givenObject) {
         return typeof givenObject !== 'undefined';

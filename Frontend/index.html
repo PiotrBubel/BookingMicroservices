@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>Booking Microservices</title>
     <link rel="stylesheet" type="text/css" href="/assets/lib/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/app/shared/globalStyles.css">
+    <link rel="stylesheet" type="text/css" href="/app/components/services/servicesStyle.css">
 
     <!--<link rel="stylesheet" type="text/css" href="/assets/lib/bootstrap/css/bootstrap-flex.min.css">-->
     <!--<link rel="stylesheet" type="text/css" href="/assets/lib/bootstrap/css/bootstrap-grid.min.css">-->
@@ -27,7 +28,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <!--<a class="navbar-brand"><img src="images/logoAtos.png" alt="logoAtos"/></a>-->
+                <a class="navbar-brand"><img src="/assets/img/logo.png" alt="logo"/></a>
                 <a class="navbar-brand" aria-selected="true" ng-href="/main">Booking Microservices</a>
             </div>
             <div id="navbar" class="navbar-collapse collapse">
@@ -35,12 +36,13 @@
                     <li ng-show="userLoggedIn"><a ng-href="/services/">Usługi</a></li>
                     <li ng-show="userLoggedIn"><a ng-href="/bookings">Rezerwacje</a></li>
                     <li ng-show="userLoggedIn"><a ng-href="/statistics">Statystyki</a></li>
-                    <li ng-show="userLoggedIn"><a ng-href="/settings">Ustawienia</a></li>
+                    <li ng-show="userLoggedIn"><a ng-href="/users">Użytkownicy</a></li>
+                    <li ng-show="userLoggedIn"><a ng-href="/user">Moje konto</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li ng-show="userLoggedIn && UID"><a ng-href="/login" ng-click="logout()">{{ UID }} <i>(wyloguj)</i></a>
                     </li>
-                    <li ng-hide="!userLoggedIn"><a ng-href="/login">Zaloguj</a></li>
+                    <li ng-hide="userLoggedIn"><a ng-href="/login">Zaloguj</a></li>
                 </ul>
             </div>
         </div>

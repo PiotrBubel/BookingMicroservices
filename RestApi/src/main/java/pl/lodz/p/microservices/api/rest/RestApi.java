@@ -7,7 +7,6 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -20,7 +19,7 @@ import pl.lodz.p.microservices.api.rest.method.ServicesManagementMethods;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ProxyService extends AbstractVerticle {
+public class RestApi extends AbstractVerticle {
     private static final String SERVICES_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.services.ServicesManagement";
 
     private static final String METHOD_KEY = "method";
@@ -28,19 +27,20 @@ public class ProxyService extends AbstractVerticle {
     private static final String SERVICES_ENDPOINT = "/api/services";
     private static final String USERS_ENDPOINT = "/api/users";
 
-    private static final Logger log = LoggerFactory.getLogger(ProxyService.class);
+    private static final Logger log = LoggerFactory.getLogger(RestApi.class);
 
     private static EventBus eventBus;
     private static Router router;
 
     @Override
     public void start() {
-        log.info("ProxyService start method");
+        log.info("RestApi start method");
 
         eventBus = vertx.eventBus();
         router = Router.router(vertx);
         router.route().handler(BodyHandler.create());
 
+        // CORS configuration
         Set<HttpMethod> allowedMethods = new HashSet<>();
         allowedMethods.add(HttpMethod.GET);
         allowedMethods.add(HttpMethod.DELETE);
@@ -71,25 +71,23 @@ public class ProxyService extends AbstractVerticle {
                 SERVICES_MANAGEMENT_SERVICE_ADDRESS,
                 context.getBodyAsJson()));
 
+        router.put(SERVICES_ENDPOINT + "/:name").handler(context -> requestHandler(context,
+                ServicesManagementMethods.EDIT_SERVICE,
+                SERVICES_MANAGEMENT_SERVICE_ADDRESS,
+                "name",
+                context.getBodyAsJson()));
+
         vertx.createHttpServer().requestHandler(router::accept).listen(8094);
     }
-
-    /*
-    vertx.createHttpServer()
-  .requestHandler(function (req) {
-    req.response()
-      .putHeader("Content-Type", "text/plain")
-      .putHeader("Access-Control-Allow-Origin", "*")
-      .putHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-      .putHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-      .end("Hello from Vert.x!");
-}).listen(8080);
-     */
-
 
     private void requestHandler(RoutingContext context, Enum method, String address, String parameter) {
         String parameterValue = context.request().getParam(parameter);
         requestHandler(context, method, address, new JsonObject().put(parameter, parameterValue));
+    }
+
+    private void requestHandler(RoutingContext context, Enum method, String address, String parameter, JsonObject body) {
+        String parameterValue = context.request().getParam(parameter);
+        requestHandler(context, method, address, new JsonObject().put(parameter, parameterValue).mergeIn(body));
     }
 
     private void requestHandler(RoutingContext context, Enum method, String address) {
@@ -97,7 +95,7 @@ public class ProxyService extends AbstractVerticle {
     }
 
     private void requestHandler(RoutingContext context, Enum method, String address, JsonObject body) {
-        log.info("Trying to start method " + method.name());
+        log.info("Passing request to start method: " + method.name() + " to microservice: " + address);
 
         final DeliveryOptions options = new DeliveryOptions()
                 .setSendTimeout(3500)
@@ -107,8 +105,6 @@ public class ProxyService extends AbstractVerticle {
     }
 
     private void passMessageToAnotherService(RoutingContext routingContext, DeliveryOptions options, String address, JsonObject jsonMessage) {
-        log.info("Trying to get to verticle with address: " + address);
-
         eventBus.send(address, jsonMessage, options,
                 response -> {
                     if (!response.succeeded()) {
@@ -118,7 +114,7 @@ public class ProxyService extends AbstractVerticle {
                     }
                     JsonObject jsonObject;
                     if (response.result().body().getClass().equals(JsonObject.class)) {
-                    jsonObject = (JsonObject) response.result().body();
+                        jsonObject = (JsonObject) response.result().body();
                     } else {
                         respond(routingContext, 500, "Internal server error. Server does not respond with application/json");
                         return;

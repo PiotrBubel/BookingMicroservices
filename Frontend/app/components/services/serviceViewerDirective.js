@@ -26,7 +26,6 @@ myApp.directive('serviceViewer', function () {
                 '{{ serviceData.description }}' +
                 '</div>' +
             '</div>' +
-
             '<div ng-if="exists(serviceData.price)" class="row">' +
                 '<div class="col-md-4">' +
                 'Cena usługi (PLN/h):' +
@@ -35,7 +34,6 @@ myApp.directive('serviceViewer', function () {
                 '{{ serviceData.price }}' +
                 '</div>' +
             '</div>' +
-
             '<div ng-if="exists(serviceData.time)" class="row">' +
                 '<div ng-if="serviceData.time !== 60 * 24">' +
                     '<div class="col-md-4">' +
@@ -53,17 +51,11 @@ myApp.directive('serviceViewer', function () {
             '</div>' +
         '</div>',
         controller: function ($scope, servicesFactory) {
-            var loadServiceData = function (name) {
-                servicesFactory.getDetails(name)
-                    .success(function (response) {
-                        $scope.serviceData = response;
-                        if ($scope.serviceData.suggestedTime === 24 * 60) {
-                            $scope.wholeDay = true;
-                        }
-                        $scope.createNew = false;
-                    });
-            };
-            loadServiceData($scope.name);
+            servicesFactory.getDetails($scope.name)
+                .success(function (response) {
+                    $scope.serviceData = response;
+                    $scope.wholeDay = ($scope.serviceData.maxTime === 24 * 60) && ($scope.serviceData.minTime === $scope.serviceData.maxTime);
+                });
         }
     }
 });
