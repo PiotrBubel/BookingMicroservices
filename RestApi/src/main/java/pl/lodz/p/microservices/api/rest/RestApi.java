@@ -15,12 +15,14 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import pl.lodz.p.microservices.api.rest.method.ServicesManagementMethods;
+import pl.lodz.p.microservices.api.rest.method.UsersManagementMethods;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class RestApi extends AbstractVerticle {
     private static final String SERVICES_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.services.ServicesManagement";
+    private static final String USERS_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.services.UsersManagement";
 
     private static final String METHOD_KEY = "method";
 
@@ -75,6 +77,32 @@ public class RestApi extends AbstractVerticle {
                 ServicesManagementMethods.EDIT_SERVICE,
                 SERVICES_MANAGEMENT_SERVICE_ADDRESS,
                 "name",
+                context.getBodyAsJson()));
+
+        // Users endpoint
+        router.get(USERS_ENDPOINT).handler(context -> requestHandler(context,
+                UsersManagementMethods.GET_USERS_LIST,
+                USERS_MANAGEMENT_SERVICE_ADDRESS));
+
+        router.get(USERS_ENDPOINT + "/:login").handler(context -> requestHandler(context,
+                UsersManagementMethods.GET_USER_DETAILS,
+                USERS_MANAGEMENT_SERVICE_ADDRESS,
+                "login"));
+
+        router.delete(USERS_ENDPOINT + "/:login").handler(context -> requestHandler(context,
+                UsersManagementMethods.DELETE_USER,
+                USERS_MANAGEMENT_SERVICE_ADDRESS,
+                "login"));
+
+        router.post(USERS_ENDPOINT).handler(context -> requestHandler(context,
+                UsersManagementMethods.SAVE_NEW_USER,
+                USERS_MANAGEMENT_SERVICE_ADDRESS,
+                context.getBodyAsJson()));
+
+        router.put(USERS_ENDPOINT + "/:login").handler(context -> requestHandler(context,
+                UsersManagementMethods.EDIT_USER,
+                USERS_MANAGEMENT_SERVICE_ADDRESS,
+                "login",
                 context.getBodyAsJson()));
 
         vertx.createHttpServer().requestHandler(router::accept).listen(8094);

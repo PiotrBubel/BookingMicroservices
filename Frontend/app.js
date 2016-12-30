@@ -19,6 +19,9 @@ var myApp = angular.module('myApp', ['ngRoute', 'ngMessages'])
             }).when('/user', {
                 controller: 'mainCtrl',
                 templateUrl: '/app/components/user/userView.html'
+            }).when('/users', {
+                controller: 'usersController',
+                templateUrl: '/app/components/users/usersView.html'
             }).when('/main', {
                 controller: 'mainCtrl',
                 templateUrl: '/app/components/main/mainView.html'

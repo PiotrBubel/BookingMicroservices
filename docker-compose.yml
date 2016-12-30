@@ -4,7 +4,7 @@ services:
   mongodatabase:
     image: microservices/mongodatabase:latest
     volumes:
-     - /data/db:/data/db
+     - /data/db/bookings:/data/db
     restart: always
 
   mongodatabaseproxy:
@@ -13,8 +13,24 @@ services:
       - mongodatabase
     restart: always
 
+  mongousersdatabase:
+    image: microservices/mongousersdatabase:latest
+    volumes:
+     - /data/db/users:/data/db
+    restart: always
+
+  mongousersdatabaseproxy:
+    image: microservices/mongousersdatabaseproxy:latest
+    links:
+      - mongousersdatabase
+    restart: always
+
   servicesmanagement:
     image: microservices/servicesmanagement:latest
+    restart: always
+
+  usersmanagement:
+    image: microservices/usersmanagement:latest
     restart: always
 
   restapi:
