@@ -1,0 +1,3 @@
+/target/docker/**
+/src/main/**
+/src/test/**

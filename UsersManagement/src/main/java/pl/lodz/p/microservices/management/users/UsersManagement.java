@@ -1,4 +1,4 @@
-package pl.lodz.p.microservices.management.services;
+package pl.lodz.p.microservices.management.users;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
@@ -14,22 +14,22 @@ import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 
-public class ServicesManagement extends AbstractVerticle {
+public class UsersManagement extends AbstractVerticle {
 
-    private static final String SERVICES_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.services.ServicesManagement";
-    private static final String DATABASE_PROXY_SERVICE_ADDRESS = "pl.lodz.p.microservices.proxy.mongo.DatabaseProxyService";
+    private static final String USERS_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.services.UsersManagement";
+    private static final String DATABASE_USERS_PROXY_SERVICE_ADDRESS = "pl.lodz.p.microservices.proxy.mongo.DatabaseUsersProxyService";
 
     private static final String METHOD_KEY = "method";
     private static final int TIMEOUT = 4000;
 
-    private static final Logger log = LoggerFactory.getLogger(ServicesManagement.class);
+    private static final Logger log = LoggerFactory.getLogger(UsersManagement.class);
 
     private static EventBus eventBus;
 
     @Override
     public void start() {
         eventBus = vertx.eventBus();
-        eventBus.consumer(SERVICES_MANAGEMENT_SERVICE_ADDRESS, this::messageHandler);
+        eventBus.consumer(USERS_MANAGEMENT_SERVICE_ADDRESS, this::messageHandler);
     }
 
     private void messageHandler(Message<JsonObject> inMessage) {
@@ -42,34 +42,34 @@ public class ServicesManagement extends AbstractVerticle {
 
         if (!EnumUtils.isValidEnum(Methods.class, requestedMethod)) {
             log.error("Method not found");
-            inMessage.fail(500, "ServicesManagement: Method" + requestedMethod + " not found");
+            inMessage.fail(500, "UsersManagement: Method" + requestedMethod + " not found");
             return;
         }
 
         switch (Methods.valueOf(requestedMethod)) {
-            case DELETE_SERVICE:
-                deleteService(inMessage);
+            case DELETE_USER:
+                deleteUser(inMessage);
                 break;
-            case SAVE_NEW_SERVICE:
-                saveNewService(inMessage);
+            case SAVE_NEW_USER:
+                saveNewUser(inMessage);
                 break;
-            case GET_SERVICES_LIST:
-                getServicesList(inMessage);
+            case GET_USERS_LIST:
+                getUsersList(inMessage);
                 break;
-            case GET_SERVICE_DETAILS:
-                getServiceDetails(inMessage);
+            case GET_USER_DETAILS:
+                getUserDetails(inMessage);
                 break;
-            case EDIT_SERVICE:
-                editService(inMessage);
+            case EDIT_USER:
+                editUser(inMessage);
                 break;
         }
     }
 
     // FIXME niepotrzebne?
-    private void getServicesList(Message<JsonObject> inMessage) {
-        log.info("Called method GET_SERVICES_LIST");
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_SERVICES_LIST"),
+    private void getUsersList(Message<JsonObject> inMessage) {
+        log.info("Called method GET_USERS_LIST");
+        eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, inMessage.body(),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_USERS_LIST"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         JsonObject replyList = new JsonObject().put("list", jsonObjectToArray(response.result().body()));
@@ -82,21 +82,21 @@ public class ServicesManagement extends AbstractVerticle {
     }
 
     // FIXME niepotrzebne?
-    private void getServiceDetails(Message<JsonObject> inMessage) {
-        log.info("Called method GET_SERVICE_DETAILS with message body: " + inMessage.body());
+    private void getUserDetails(Message<JsonObject> inMessage) {
+        log.info("Called method GET_USER_DETAILS with message body: " + inMessage.body());
 
         if (inMessage.body() == null) {
-            log.error("Received GET_SERVICE_DETAILS command without json object");
+            log.error("Received GET_USER_DETAILS command without json object");
             inMessage.fail(400, "Received method call without JsonObject");
             return;
-        } else if (!inMessage.body().containsKey("name")) {
-            log.error("Received GET_SERVICE_DETAILS command without service name");
-            inMessage.fail(400, "Bad request. Field 'name' is required.");
+        } else if (!inMessage.body().containsKey("login")) {
+            log.error("Received GET_USER_DETAILS command without user login");
+            inMessage.fail(400, "Bad request. Field 'login' is required.");
             return;
         }
 
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_SERVICE_DETAILS"),
+        eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, inMessage.body(),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_USER_DETAILS"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         inMessage.reply(response.result().body());
@@ -108,23 +108,23 @@ public class ServicesManagement extends AbstractVerticle {
     }
 
     // FIXME niepotrzebne?
-    private void saveNewService(Message<JsonObject> inMessage) {
-        log.info("Called method SAVE_NEW_SERVICE with message body: " + inMessage.body());
+    private void saveNewUser(Message<JsonObject> inMessage) {
+        log.info("Called method SAVE_NEW_USER with message body: " + inMessage.body());
 
-        if (!inMessage.body().containsKey("service")) {
-            inMessage.fail(400, "Bad Request. Key 'service' is required.");
+        if (!inMessage.body().containsKey("user")) {
+            inMessage.fail(400, "Bad Request. Key 'user' is required.");
             return;
         }
-        JsonObject newService = inMessage.body().getJsonObject("service");
+        JsonObject newService = inMessage.body().getJsonObject("user");
 
-        if (!newService.containsKey("name") || !newService.containsKey("price") ||
-                StringUtils.isBlank(newService.getString("name"))) {
-            inMessage.fail(400, "Bad Request. Fields 'name' and 'price' are required.");
+        if (!newService.containsKey("login") ||
+                StringUtils.isBlank(newService.getString("login"))) {
+            inMessage.fail(400, "Bad Request. Fields 'login' is required.");
             return;
         }
 
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, newService,
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "SAVE_NEW_SERVICE"),
+        eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, newService,
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "SAVE_NEW_USER"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         inMessage.reply(response.result().body());
@@ -136,20 +136,20 @@ public class ServicesManagement extends AbstractVerticle {
     }
 
     // FIXME niepotrzebne?
-    private void editService(Message<JsonObject> inMessage) {
-        log.info("Called method EDIT_SERVICE with message body: " + inMessage.body());
+    private void editUser(Message<JsonObject> inMessage) {
+        log.info("Called method EDIT_USER with message body: " + inMessage.body());
 
-        if (!inMessage.body().containsKey("service")) {
-            inMessage.fail(400, "Bad Request. Service data is required.");
+        if (!inMessage.body().containsKey("user")) {
+            inMessage.fail(400, "Bad Request. User data is required.");
             return;
         }
-        if (!inMessage.body().containsKey("name")) {
-            inMessage.fail(400, "Bad Request. Service name is required.");
+        if (!inMessage.body().containsKey("login")) {
+            inMessage.fail(400, "Bad Request. User login is required.");
             return;
         }
 
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "EDIT_SERVICE"),
+        eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, inMessage.body(),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "EDIT_USER"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         inMessage.reply(response.result().body());
@@ -161,10 +161,10 @@ public class ServicesManagement extends AbstractVerticle {
     }
 
     // FIXME niepotrzebne?
-    private void deleteService(Message<JsonObject> inMessage) {
-        log.info("Called method DELETE_SERVICE with message body: " + inMessage.body());
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "DELETE_SERVICE"),
+    private void deleteUser(Message<JsonObject> inMessage) {
+        log.info("Called method DELETE_USER with message body: " + inMessage.body());
+        eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, inMessage.body(),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "DELETE_USER"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         inMessage.reply(response.result().body());
@@ -180,7 +180,7 @@ public class ServicesManagement extends AbstractVerticle {
         JsonArray array = new JsonArray();
         JsonArray given = object.getJsonArray("list");
         for (int i = 0; i < given.size(); i++) {
-            array.add(given.getJsonObject(i).getValue("name"));
+            array.add(given.getJsonObject(i).getValue("login"));
         }
         return array;
     }

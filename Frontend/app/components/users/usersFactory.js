@@ -10,10 +10,10 @@ myApp.factory("usersFactory", function ($http, appConfig) {
             return $http.get(appConfig.apiAddress + '/users/' + name);
         },
         edit: function (name, serviceData) {
-            return $http.put(appConfig.apiAddress + '/users/' + name, {service: serviceData});
+            return $http.put(appConfig.apiAddress + '/users/' + name, {user: serviceData});
         },
         create: function (serviceData) {
-            return $http.post(appConfig.apiAddress + '/users', {service: serviceData});
+            return $http.post(appConfig.apiAddress + '/users', {user: serviceData});
         },
         remove: function (name) {
             return $http.delete(appConfig.apiAddress + '/users/' + name);

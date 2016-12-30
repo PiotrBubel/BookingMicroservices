@@ -37,49 +37,6 @@ db.Services.createIndex(
 );
 print('* Created collection Services. All collections: ' + db.getCollectionNames());
 
-db.Users.drop();
-db.createCollection("Users", {
-    validator: {
-        $and: [{
-            UID: {
-                $type: "string",
-                $exists: true
-            },
-            password: {
-                $type: "string",
-                $exists: true
-            },
-            firstName: {
-                $type: "string",
-                $exists: true
-            },
-            lastName: {
-                $type: "string",
-                $exists: true
-            },
-            canBookService: {
-                $type: "boolean",
-                $exists: true
-            },
-            canSeeBookings: {
-                $type: "boolean",
-                $exists: true
-            },
-            canManageServices: {
-                $type: "boolean",
-                $exists: true
-            }
-        }]
-    },
-    validationAction: "error"
-});
-
-db.Users.createIndex(
-    {UID: 1},
-    {unique: true}
-);
-print('* Created collection Users. All collections: ' + db.getCollectionNames());
-
 db.Bookings.drop();
 db.createCollection("Bookings", {
     capped: true,
@@ -119,12 +76,6 @@ db.createRole({
     privileges: [{
         resource: {
             db: "BookingsServiceDB",
-            collection: "Users"
-        },
-        actions: ["find", "insert"]
-    }, {
-        resource: {
-            db: "BookingsServiceDB",
             collection: "Bookings"
         },
         actions: ["find", "insert"]
@@ -155,20 +106,6 @@ db.createUser({
     }]
 });
 print('* Created user BookingsServiceApp, pwd: BookingsServicep@Ssw0rd');
-
-db.Users.insert({
-    UID: "pbubel",
-    password: "pbubel",
-    firstName: true,
-    lastName: true,
-    permissions: {
-        canBookService: true,
-        canSeeAllBookings: true,
-        canManageServices: true,
-        canManageUsers: true
-    }
-});
-print('* Inserted user into db');
 
 db.Services.insert({
     name: "usluga1",

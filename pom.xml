@@ -11,7 +11,10 @@
     <modules>
         <module>MongoDatabase</module>
         <module>MongoDatabaseProxy</module>
+        <module>MongoUsersDatabase</module>
+        <module>MongoUsersDatabaseProxy</module>
         <module>ServicesManagement</module>
+        <module>UsersManagement</module>
         <module>RestApi</module>
         <module>Frontend</module>
     </modules>
