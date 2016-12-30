@@ -4,6 +4,6 @@
 myApp.factory('appConfig', function () {
 
     return {
-        apiAddress: 'http://localhost:8094/api'
+        apiAddress: 'http://192.168.1.13:8094/api'
     }
 });

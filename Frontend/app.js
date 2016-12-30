@@ -16,7 +16,7 @@ var myApp = angular.module('myApp', ['ngRoute', 'ngMessages'])
             }).when('/statistics', {
                 controller: 'mainCtrl',
                 templateUrl: '/app/components/statistics/statisticsView.html'
-            }).when('/settings', {
+            }).when('/user', {
                 controller: 'mainCtrl',
                 templateUrl: '/app/components/user/userView.html'
             }).when('/main', {

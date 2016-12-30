@@ -161,9 +161,12 @@ db.Users.insert({
     password: "pbubel",
     firstName: true,
     lastName: true,
-    canBookService: true,
-    canSeeBookings: true,
-    canManageServices: true
+    permissions: {
+        canBookService: true,
+        canSeeAllBookings: true,
+        canManageServices: true,
+        canManageUsers: true
+    }
 });
 print('* Inserted user into db');
 

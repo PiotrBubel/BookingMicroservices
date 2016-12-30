@@ -69,17 +69,20 @@ public class MongoDatabaseProxyService extends AbstractVerticle {
             case GET_SERVICES_LIST:
                 getServicesList(inMessage);
                 break;
+            case GET_SERVICE_DETAILS:
+                getServiceDetails(inMessage);
+                break;
             case SAVE_NEW_SERVICE:
                 saveNewService(inMessage);
                 break;
             case DELETE_SERVICE:
                 deleteService(inMessage);
                 break;
+            case EDIT_SERVICE:
+                editService(inMessage);
+                break;
             case LOGIN:
                 checkCredentials(inMessage);
-                break;
-            case GET_SERVICE_DETAILS:
-                getServiceDetails(inMessage);
                 break;
         }
     }
@@ -129,6 +132,34 @@ public class MongoDatabaseProxyService extends AbstractVerticle {
                 }
             } else {
                 log.error("Load service details from database failed, cause: " + response.cause().getMessage());
+                inMessage.fail(500, "Database error: " + response.cause().getMessage());
+            }
+        });
+    }
+
+    private void editService(Message<JsonObject> inMessage) {
+        log.info("Called method EDIT_SERVICE");
+
+        if (inMessage.body() == null) {
+            log.error("Received EDIT_SERVICE command without json object");
+            inMessage.fail(400, "Received method call without JsonObject");
+            return;
+        } else if (!inMessage.body().containsKey("name")) {
+            log.error("Received EDIT_SERVICE command without service name");
+            inMessage.fail(400, "Received method call without valid JsonObject");
+            return;
+        }
+        String name = inMessage.body().getString("name");
+        JsonObject jsonQuery = new JsonObject().put("name", name);
+        JsonObject serviceData = inMessage.body().getJsonObject("service");
+        JsonObject update = new JsonObject().put("$set", serviceData);
+
+        mongoClient.update(COLLECTION_SERVICES, jsonQuery, update, response -> {
+            if (response.succeeded()) {
+                log.info("Save new service data to database succeeded. Edited service: " + name + " new data: " + serviceData.encode());
+                inMessage.reply(Utils.jsonHttpResponse(200, "Edited"));
+            } else {
+                log.info("Save new service data to database failed, cause: " + response.cause().getMessage());
                 inMessage.fail(500, "Database error: " + response.cause().getMessage());
             }
         });

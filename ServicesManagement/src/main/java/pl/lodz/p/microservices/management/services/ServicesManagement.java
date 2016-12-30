@@ -5,6 +5,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -58,19 +59,23 @@ public class ServicesManagement extends AbstractVerticle {
             case GET_SERVICE_DETAILS:
                 getServiceDetails(inMessage);
                 break;
+            case EDIT_SERVICE:
+                editService(inMessage);
+                break;
         }
     }
 
     private void getServicesList(Message<JsonObject> inMessage) {
         log.info("Called method GET_SERVICES_LIST");
         eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(4000).addHeader(METHOD_KEY, "GET_SERVICES_LIST"),
-                (AsyncResult<Message<JsonObject>> messageAsyncResult) -> {
-                    if (messageAsyncResult.succeeded()) {
-                        JsonObject replyList = new JsonObject().put("list", jsonObjectToArray(messageAsyncResult.result().body()));
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_SERVICES_LIST"),
+                (AsyncResult<Message<JsonObject>> response) -> {
+                    if (response.succeeded()) {
+                        JsonObject replyList = new JsonObject().put("list", jsonObjectToArray(response.result().body()));
                         inMessage.reply(replyList);
                     } else {
-                        inMessage.fail(500, messageAsyncResult.cause().getMessage());
+                        ReplyException cause = (ReplyException) response.cause();
+                        inMessage.fail(cause.failureCode(), cause.getMessage());
                     }
                 });
     }
@@ -84,17 +89,18 @@ public class ServicesManagement extends AbstractVerticle {
             return;
         } else if (!inMessage.body().containsKey("name")) {
             log.error("Received GET_SERVICE_DETAILS command without service name");
-            inMessage.fail(400, "Received method call without valid JsonObject");
+            inMessage.fail(400, "Bad request. Field 'name' is required.");
             return;
         }
 
         eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(4000).addHeader(METHOD_KEY, "GET_SERVICE_DETAILS"),
-                (AsyncResult<Message<JsonObject>> messageAsyncResult) -> {
-                    if (messageAsyncResult.succeeded()) {
-                        inMessage.reply(messageAsyncResult.result().body());
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_SERVICE_DETAILS"),
+                (AsyncResult<Message<JsonObject>> response) -> {
+                    if (response.succeeded()) {
+                        inMessage.reply(response.result().body());
                     } else {
-                        inMessage.fail(500, messageAsyncResult.cause().getMessage());
+                        ReplyException cause = (ReplyException) response.cause();
+                        inMessage.fail(cause.failureCode(), cause.getMessage());
                     }
                 });
     }
@@ -103,24 +109,49 @@ public class ServicesManagement extends AbstractVerticle {
         log.info("Called method SAVE_NEW_SERVICE with message body: " + inMessage.body());
 
         if (!inMessage.body().containsKey("service")) {
-            inMessage.fail(400, "Bad Request");
+            inMessage.fail(400, "Bad Request. Key 'service' is required.");
             return;
         }
         JsonObject newService = inMessage.body().getJsonObject("service");
 
         if (!newService.containsKey("name") || !newService.containsKey("price") ||
                 StringUtils.isBlank(newService.getString("name"))) {
-            inMessage.fail(400, "Bad Request");
+            inMessage.fail(400, "Bad Request. Fields 'name' and 'price' are required.");
             return;
         }
 
         eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, newService,
-                new DeliveryOptions().setSendTimeout(4000).addHeader(METHOD_KEY, "SAVE_NEW_SERVICE"),
-                (AsyncResult<Message<JsonObject>> messageAsyncResult) -> {
-                    if (messageAsyncResult.succeeded()) {
-                        inMessage.reply(messageAsyncResult.result().body());
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "SAVE_NEW_SERVICE"),
+                (AsyncResult<Message<JsonObject>> response) -> {
+                    if (response.succeeded()) {
+                        inMessage.reply(response.result().body());
                     } else {
-                        inMessage.fail(500, messageAsyncResult.cause().getMessage());
+                        ReplyException cause = (ReplyException) response.cause();
+                        inMessage.fail(cause.failureCode(), cause.getMessage());
+                    }
+                });
+    }
+
+    private void editService(Message<JsonObject> inMessage) {
+        log.info("Called method EDIT_SERVICE with message body: " + inMessage.body());
+
+        if (!inMessage.body().containsKey("service")) {
+            inMessage.fail(400, "Bad Request. Service data is required.");
+            return;
+        }
+        if (!inMessage.body().containsKey("name")) {
+            inMessage.fail(400, "Bad Request. Service name is required.");
+            return;
+        }
+
+        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "EDIT_SERVICE"),
+                (AsyncResult<Message<JsonObject>> response) -> {
+                    if (response.succeeded()) {
+                        inMessage.reply(response.result().body());
+                    } else {
+                        ReplyException cause = (ReplyException) response.cause();
+                        inMessage.fail(cause.failureCode(), cause.getMessage());
                     }
                 });
     }
@@ -128,16 +159,18 @@ public class ServicesManagement extends AbstractVerticle {
     private void deleteService(Message<JsonObject> inMessage) {
         log.info("Called method DELETE_SERVICE with message body: " + inMessage.body());
         eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(4000).addHeader(METHOD_KEY, "DELETE_SERVICE"),
-                (AsyncResult<Message<JsonObject>> messageAsyncResult) -> {
-                    if (messageAsyncResult.succeeded()) {
-                        inMessage.reply(messageAsyncResult.result().body());
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "DELETE_SERVICE"),
+                (AsyncResult<Message<JsonObject>> response) -> {
+                    if (response.succeeded()) {
+                        inMessage.reply(response.result().body());
                     } else {
-                        inMessage.fail(500, messageAsyncResult.cause().getMessage());
+                        ReplyException cause = (ReplyException) response.cause();
+                        inMessage.fail(cause.failureCode(), cause.getMessage());
                     }
                 });
     }
 
+    // TODO move it to separate Helpers class
     private JsonArray jsonObjectToArray(JsonObject object) {
         JsonArray array = new JsonArray();
         JsonArray given = object.getJsonArray("list");

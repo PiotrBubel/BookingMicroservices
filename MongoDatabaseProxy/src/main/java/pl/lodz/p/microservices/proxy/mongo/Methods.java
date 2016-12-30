@@ -5,5 +5,6 @@ enum Methods {
     GET_SERVICE_DETAILS,
     SAVE_NEW_SERVICE,
     DELETE_SERVICE,
+    EDIT_SERVICE,
     LOGIN
 }
