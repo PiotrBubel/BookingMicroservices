@@ -1,0 +1,4 @@
+/target/**
+readme.md
+*.iml
+pom.xml

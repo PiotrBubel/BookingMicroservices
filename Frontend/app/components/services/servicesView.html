@@ -1,0 +1,105 @@
+<div class="row">
+    <div class="col-md-4">
+        <p>Dostępne usługi:</p>
+        <div class="list-group">
+            <div ng-repeat="service in services">
+                <a ng-click="changeSelected(service)" class="list-group-item">
+                    {{ service }}
+                </a>
+            </div>
+            <a class="list-group-item list-group-item-success" ng-click="setNew()">-- nowa --</a>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div ng-if="!createNew">
+            <div ng-if="exists(selected.name)" class="row">
+                <div class="col-md-4">
+                    Nazwa usługi:
+                </div>
+                <div class="col-md-8">
+                    {{ selected.name }}
+                </div>
+            </div>
+
+            <div ng-if="exists(selected.description)" class="row">
+                <div class="col-md-4">
+                    Opis usługi:
+                </div>
+                <div class="col-md-8">
+                    {{ selected.description }}
+                </div>
+            </div>
+
+            <div ng-if="exists(selected.description)" class="row">
+                <div class="col-md-4">
+                    Cena usługi (PLN/h):
+                </div>
+                <div class="col-md-8">
+                    {{ selected.price }}
+                </div>
+            </div>
+
+            <div ng-if="exists(selected.time)" class="row">
+                <div class="col-md-4">
+                    Czas usługi:
+                </div>
+                <div class="col-md-8">
+                    {{ selected.suggestedTime }}
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <div class="btn btn-warning" ng-click="removeService()" ng-disabled="services.length !== 0">
+                    Usuń
+                </div>
+            </div>
+        </div>
+
+        <div ng-if="createNew">
+            <form class="form-group" name="serviceForm" novalidate>
+                <div class="row">
+                    <div class="col-md-4">
+                        Nazwa usługi:
+                    </div>
+                    <div class="col-md-8">
+                        <input class="form-control" type="text" name="name" ng-model="newService.name" ng-required>
+                        <div ng-show="serviceForm.name.$error.required">Pole jest wymagane</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        Opis usługi:
+                    </div>
+                    <div class="col-md-8">
+                        <input class="form-control" type="text" name="description" ng-model="newService.description" ng-required>
+                        <div ng-show="serviceForm.description.$error.required">Pole jest wymagane</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        Cena usługi (PLN/h):
+                    </div>
+                    <div class="col-md-8">
+                        <input class="form-control" type="number" name="price" ng-model="newService.price" ng-required>
+                        <div ng-show="serviceForm.price.$error.required">Pole jest wymagane</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        Sugerowany czas:
+                    </div>
+                    <div class="col-md-8">
+                        <input class="form-control" type="number" name="suggestedTime" ng-model="newService.suggestedTime" ng-required>
+                        <div ng-show="serviceForm.suggestedTime.$error.required">Pole jest wymagane</div>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <div class="btn btn-success" ng-click="saveNewService()" ng-disabled="!serviceForm.$valid">
+                        Dodaj
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

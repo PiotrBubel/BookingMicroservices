@@ -108,14 +108,14 @@ public class MongoDatabaseProxyService extends AbstractVerticle {
             log.error("Received GET_SERVICE_DETAILS command without json object");
             inMessage.fail(400, "Received method call without JsonObject");
             return;
-        } else if (!inMessage.body().containsKey("serviceName")) {
+        } else if (!inMessage.body().containsKey("name")) {
             log.error("Received GET_SERVICE_DETAILS command without service name");
             inMessage.fail(400, "Received method call without valid JsonObject");
             return;
         }
-        String serviceName = inMessage.body().getString("serviceName");
+        String name = inMessage.body().getString("name");
         FindOptions options = new FindOptions().setFields(new JsonObject().put("_id", 0));
-        JsonObject jsonQuery = new JsonObject().put("serviceName", serviceName);
+        JsonObject jsonQuery = new JsonObject().put("name", name);
 
         mongoClient.findWithOptions(COLLECTION_SERVICES, jsonQuery, options, response -> {
             if (response.succeeded()) {
@@ -124,8 +124,8 @@ public class MongoDatabaseProxyService extends AbstractVerticle {
                     inMessage.reply(result);
                     log.info("Load service details from database succeeded. " + result);
                 } else {
-                    log.info("Load service details from database not succeeded. No service with name: " + serviceName);
-                    inMessage.fail(404, "No service with name: " + serviceName);
+                    log.info("Load service details from database not succeeded. No service with name: " + name);
+                    inMessage.fail(404, "No service with name: " + name);
                 }
             } else {
                 log.error("Load service details from database failed, cause: " + response.cause().getMessage());
@@ -162,13 +162,13 @@ public class MongoDatabaseProxyService extends AbstractVerticle {
             log.error("Received DELETE_SERVICE command without json object");
             inMessage.fail(400, "Received method call without JsonObject");
             return;
-        } else if (!inMessage.body().containsKey("serviceName")) {
+        } else if (!inMessage.body().containsKey("name")) {
             log.error("Received DELETE_SERVICE command without service name");
             inMessage.fail(400, "Received method call without valid JsonObject");
             return;
         }
 
-        JsonObject jsonQuery = new JsonObject().put("serviceName", inMessage.body().getValue("serviceName"));
+        JsonObject jsonQuery = new JsonObject().put("name", inMessage.body().getValue("name"));
         mongoClient.removeOne(COLLECTION_SERVICES, jsonQuery, response -> {
             if (response.succeeded()) {
                 inMessage.reply(Utils.jsonHttpResponse(204, "No content"));

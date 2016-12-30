@@ -22,3 +22,9 @@ services:
     ports:
           - "8094:8094"
     restart: always
+
+  frontend:
+    image: microservices/frontend:latest
+    ports:
+          - "80:80"
+    restart: always

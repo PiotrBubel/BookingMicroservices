@@ -7,11 +7,15 @@ db.Services.drop();
 db.createCollection("Services", {
     validator: {
         $and: [{
-            serviceName: {
+            name: {
                 $type: "string",
                 $exists: true
             },
-            time: {
+            suggestedTime: {
+                $type: "int",
+                $exists: true
+            },
+            price: {
                 $type: "int",
                 $exists: true
             },
@@ -24,7 +28,7 @@ db.createCollection("Services", {
     validationAction: "error"
 });
 db.Services.createIndex(
-    {serviceName: 1},
+    {name: 1},
     {unique: true}
 );
 print('* Created collection Services. All collections: ' + db.getCollectionNames());
@@ -87,7 +91,7 @@ db.createCollection("Bookings", {
                 $type: "int",
                 $exists: true
             },
-            requestedTime: {
+            time: {
                 $type: "int",
                 $exists: true
             },
@@ -160,26 +164,30 @@ db.Users.insert({
 print('* Inserted user into db');
 
 db.Services.insert({
-    serviceName: "usluga1",
-    time: NumberInt(15),
+    name: "usluga1",
+    suggestedTime: NumberInt(15),
+    price: NumberInt(15),
     description: "opis uslugi 1"
 });
 
 db.Services.insert({
-    serviceName: "usluga2",
-    time: NumberInt(30),
+    name: "usluga2",
+    suggestedTime: NumberInt(15),
+    price: NumberInt(15),
     description: "opis uslugi 2"
 });
 
 db.Services.insert({
-    serviceName: "usluga3",
-    time: NumberInt(60),
+    name: "usluga3",
+    suggestedTime: NumberInt(15),
+    price: NumberInt(15),
     description: "opis uslugi 3"
 });
 
 db.Services.insert({
-    serviceName: "usluga4",
-    time: NumberInt(24 * 60),
+    name: "usluga4",
+    suggestedTime: NumberInt(15),
+    price: NumberInt(15),
     description: "opis uslugi 4"
 });
 
