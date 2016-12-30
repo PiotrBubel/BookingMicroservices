@@ -1,68 +1,130 @@
 'use strict';
 
-myApp.controller("servicesController", function ($http, $scope) {
+myApp.controller("servicesController", function ($scope, $timeout, servicesFactory) {
 
     $scope.createNew = true;
-    $scope.newService = {
-        name: '',
-        description: '',
-        price: 0,
-        suggestedTime: 0
+    $scope.serviceData = {
+        price: 1,
+        minTime: 1,
+        maxTime: 2
     };
-    var clearData = angular.copy($scope.newService);
+    var clearData = angular.copy($scope.serviceData);
+
+    var messageHandler = {};
+    messageHandler.showErrorMessage = function (message, description) {
+        if (message) {
+            $scope.errorMessage = message;
+        } else {
+            $scope.errorMessage = 'Błąd';
+        }
+        if (description) {
+            $scope.errorDescription = description;
+        } else {
+            $scope.errorDescription = '';
+        }
+        $scope.showErrorMessage = true;
+        $(".alert-danger").hide().show('medium');
+        $timeout(function () {
+            $scope.showErrorMessage = false;
+        }, 3000);
+    };
+
+    messageHandler.showSuccessMessage = function (message, description) {
+        if (message) {
+            $scope.successMessage = message;
+        } else {
+            $scope.successMessage = 'Sukces';
+        }
+        if (description) {
+            $scope.successDescription = description;
+        } else {
+            $scope.successDescription = '';
+        }
+        $scope.showSuccessMessage = true;
+        $(".alert-success").hide().show('medium');
+        $timeout(function () {
+            $scope.showSuccessMessage = false;
+        }, 3000);
+    };
 
     var refreshList = function () {
-        $http.get('http://localhost:8094/api/services')
+        servicesFactory.getList()
             .success(function (response) {
-                console.log(response);
                 $scope.services = response.list;
             })
-            .error(function (error, status) {
-                console.log('error', error);
-                console.log('status', status);
+            .error(function (error) {
+                messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
             });
     };
     refreshList();
 
     $scope.changeSelected = function (item) {
-        $http.get('http://localhost:8094/api/services/' + item)
+        servicesFactory.getDetails(item)
             .success(function (response) {
-                console.log(response);
-                $scope.selected = response;
+                $scope.serviceData = response;
+                $scope.wholeDay = ($scope.serviceData.maxTime === 24 * 60) && ($scope.serviceData.minTime === $scope.serviceData.maxTime);
                 $scope.createNew = false;
             })
-            .error(function (error, status) {
-                console.log('error', error);
-                console.log('status', status);
+            .error(function (error) {
+                messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
             });
     };
 
     $scope.setNew = function () {
         $scope.createNew = true;
-        $scope.newService = angular.copy(clearData);
+        $scope.serviceData = angular.copy(clearData);
+        delete($scope.serviceData.name);
+        delete($scope.serviceData.description);
     };
 
     $scope.saveNewService = function () {
-        console.log('$scope.newService', $scope.newService);
-        $http.post('http://localhost:8094/api/services', {service: $scope.newService})
-            .success(function (response) {
-                console.log(response);
-                $scope.selected = $scope.newService;
+        console.log('$scope.serviceData', $scope.serviceData);
+        if ($scope.wholeDay) {
+            $scope.serviceData.minTime = $scope.serviceData.maxTime = 60 * 24;
+        }
+        servicesFactory.create($scope.serviceData)
+            .success(function () {
+                messageHandler.showSuccessMessage('Dodano pomyślnie');
+                $scope.changeSelected($scope.serviceData.name);
                 $scope.createNew = false;
                 refreshList();
             })
-            .error(function (error, status) {
-                console.log('error', error);
-                console.log('status', status);
+            .error(function (error) {
+                messageHandler.showErrorMessage('Błąd ', error.message);
             });
     };
 
     $scope.removeService = function () {
-        $http.delete('http://localhost:8094/api/services/' + $scope.selected.name).then(function (response) {
-            refreshList();
-            $scope.setNew();
-        });
+        servicesFactory.remove($scope.serviceData.name)
+            .success(function () {
+                messageHandler.showSuccessMessage('Usunięto pomyślnie');
+                refreshList();
+                $scope.setNew();
+            })
+            .error(function (error) {
+                messageHandler.showErrorMessage('Błąd ', error.message);
+            });
     };
+
+    $scope.editService = function () {
+        var newData = angular.copy($scope.serviceData);
+        delete(newData.name);
+        servicesFactory.edit($scope.serviceData.name, newData)
+            .success(function () {
+                messageHandler.showSuccessMessage('Edytowano pomyślnie');
+                refreshList();
+                $scope.setNew();
+            })
+            .error(function (error) {
+                messageHandler.showErrorMessage('Błąd ', error.message);
+            });
+    };
+
+    $scope.$watch('serviceData.maxTime + serviceData.minTime', function (newValue, oldValue) {
+        if (!angular.equals(newValue, oldValue)) {
+            $scope.wholeDay = ($scope.serviceData.maxTime === 24 * 60) && ($scope.serviceData.minTime === $scope.serviceData.maxTime);
+        }
+    });
 
     $scope.exists = function (givenObject) {
         return typeof givenObject !== 'undefined';

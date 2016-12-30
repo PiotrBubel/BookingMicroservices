@@ -1,6 +1,6 @@
 'use strict';
 
-var myApp = angular.module('myApp', ['ngRoute'])
+var myApp = angular.module('myApp', ['ngRoute', 'ngMessages'])
 
     .config(['$routeProvider', '$locationProvider',
         function ($routeProvider, $locationProvider) {
@@ -32,8 +32,25 @@ myApp.controller("mainCtrl", function ($http, $scope) {
     $scope.UID = 'wesole testy';
     $scope.userLoggedIn = true;
     console.log('main controller');
+    // messageHandler.showMessage('dupka');
     // $http.get('http://localhost:8094/api/services').then(function (response) {
     //     $scope.services = response.data.list;
     //     console.log(response);
     // });
 });
+
+
+// myApp.factory("messageHandler", function ($timeout, $scope) {
+//         this.showMessage = function(message) {
+//             if(message) {
+//                 $scope.message = message;
+//             } else {
+//                 $scope.message = 'Empty message';
+//             }
+//             $scope.showMessage = true;
+//             $timeout(function() {
+//                 $scope.showMessage = false;
+//             }, 3000);
+//         }
+//     }
+// );
