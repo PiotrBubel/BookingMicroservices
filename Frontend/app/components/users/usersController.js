@@ -4,11 +4,13 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory) {
 
     $scope.createNew = true;
     $scope.userData = {
-        description: '',
-        price: 1,
-        minTime: 1,
-        maxTime: 2
+        permissions: {
+            canManageServices: false,
+            canManageUsers: false,
+            canManageBookings: false
+        }
     };
+
     var clearData = angular.copy($scope.userData);
 
     var messageHandler = {};
@@ -59,11 +61,10 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory) {
     };
     refreshList();
 
-    $scope.changeSelected = function (name) {
-        usersFactory.getDetails(name)
+    $scope.changeSelected = function (login) {
+        usersFactory.getDetails(login)
             .success(function (response) {
                 $scope.userData = response;
-                $scope.wholeDay = ($scope.userData.maxTime === 24 * 60) && ($scope.userData.minTime === $scope.userData.maxTime);
                 $scope.createNew = false;
             })
             .error(function (error) {
@@ -74,18 +75,19 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory) {
     $scope.setNew = function () {
         $scope.createNew = true;
         $scope.userData = angular.copy(clearData);
-        delete($scope.userData.name);
+        delete($scope.userData.login);
+        delete($scope.userData.password);
+        delete($scope.userData.firstName);
+        delete($scope.userData.lastName);
+        delete($scope.userData.email);
     };
 
     $scope.saveNewUser = function () {
         console.log('$scope.userData', $scope.userData);
-        if ($scope.wholeDay) {
-            $scope.userData.minTime = $scope.userData.maxTime = 60 * 24;
-        }
         usersFactory.create($scope.userData)
             .success(function () {
                 messageHandler.showSuccessMessage('Dodano pomyślnie');
-                $scope.changeSelected($scope.userData.name);
+                $scope.changeSelected($scope.userData.login);
                 $scope.createNew = false;
                 refreshList();
             })
@@ -95,7 +97,7 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory) {
     };
 
     $scope.removeUser = function () {
-        usersFactory.remove($scope.userData.name)
+        usersFactory.remove($scope.userData.login)
             .success(function () {
                 messageHandler.showSuccessMessage('Usunięto pomyślnie');
                 refreshList();
@@ -108,12 +110,12 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory) {
 
     $scope.editUser = function () {
         var newData = angular.copy($scope.userData);
-        delete(newData.name);
-        usersFactory.edit($scope.userData.name, newData)
+        delete(newData.login);
+        usersFactory.edit($scope.userData.login, newData)
             .success(function () {
                 messageHandler.showSuccessMessage('Edytowano pomyślnie');
                 refreshList();
-                $scope.changeSelected($scope.userData.name);
+                $scope.changeSelected($scope.userData.login);
             })
             .error(function (error) {
                 messageHandler.showErrorMessage('Błąd ', error.message);

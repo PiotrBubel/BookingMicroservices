@@ -9,11 +9,11 @@ myApp.factory("usersFactory", function ($http, appConfig) {
         getDetails: function (name) {
             return $http.get(appConfig.apiAddress + '/users/' + name);
         },
-        edit: function (name, serviceData) {
-            return $http.put(appConfig.apiAddress + '/users/' + name, {user: serviceData});
+        edit: function (name, userData) {
+            return $http.put(appConfig.apiAddress + '/users/' + name, {user: userData});
         },
-        create: function (serviceData) {
-            return $http.post(appConfig.apiAddress + '/users', {user: serviceData});
+        create: function (userData) {
+            return $http.post(appConfig.apiAddress + '/users', {user: userData});
         },
         remove: function (name) {
             return $http.delete(appConfig.apiAddress + '/users/' + name);

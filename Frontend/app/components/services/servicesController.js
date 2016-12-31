@@ -120,11 +120,20 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
             });
     };
 
-    $scope.$watch('serviceData.maxTime + serviceData.minTime', function (newValue, oldValue) {
-        if (!angular.equals(newValue, oldValue)) {
-            $scope.wholeDay = ($scope.serviceData.maxTime === 24 * 60) && ($scope.serviceData.minTime === $scope.serviceData.maxTime);
+    $scope.changeWholeDay = function (wholeDay) {
+        if (wholeDay) {
+            $scope.serviceData.minTime = $scope.serviceData.maxTime = 24 * 60;
+        } else {
+            $scope.serviceData.minTime = 1;
+            $scope.serviceData.maxTime = 2;
         }
-    });
+    };
+
+    // $scope.$watch('serviceData.maxTime + serviceData.minTime', function (newValue, oldValue) {
+    //     if (!angular.equals(newValue, oldValue)) {
+    //         $scope.wholeDay = ($scope.serviceData.maxTime === 24 * 60) && ($scope.serviceData.minTime === $scope.serviceData.maxTime);
+    //     }
+    // });
 
     $scope.exists = function (givenObject) {
         return typeof givenObject !== 'undefined';

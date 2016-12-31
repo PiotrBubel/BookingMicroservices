@@ -31,6 +31,16 @@ var myApp = angular.module('myApp', ['ngRoute', 'ngMessages'])
             $locationProvider.html5Mode({enabled: true, requireBase: false});
         }]);
 
+// myApp.run(function () {
+//     var windowElement = angular.element($window);
+//     windowElement.on('beforeunload', function (event) {
+//         // do whatever you want in here before the page unloads.
+//         console.log('dupka reload');
+//         // the following line of code will prevent reload or navigating away.
+//         event.preventDefault();
+//     });
+// });
+
 myApp.controller("mainCtrl", function ($http, $scope) {
     $scope.UID = 'wesole testy';
     $scope.userLoggedIn = true;
