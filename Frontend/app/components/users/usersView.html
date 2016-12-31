@@ -1,91 +1,143 @@
 <div class="row">
     <div class="col-md-4">
-        <p>Dostępne usługi:</p>
+        <p>Zarejestrowani użytkownicy:</p>
         <div class="list-group">
-            <div ng-repeat="name in services">
-                <a ng-click="changeSelected(name)" class="list-group-item"
-                   ng-class="(name==serviceData.name) ? 'active' : ''">
-                    {{ name }}
+            <div ng-repeat="login in users">
+                <a ng-click="changeSelected(login)" class="list-group-item"
+                   ng-class="(login===userData.login) ? 'active' : ''">
+                    {{ login }}
                 </a>
             </div>
-            <a class="list-group-item list-group-item-success" ng-click="setNew()">-- nowa --</a>
+            <a class="list-group-item list-group-item-success" ng-click="setNew()">-- nowy --</a>
         </div>
     </div>
-    <!--<service-viewer name="{{ services[0] }}"></service-viewer>-->
+
     <div class="col-md-8">
-        <form name="serviceForm" novalidate>
+        <form name="userForm" novalidate>
             <div class="row">
                 <div class="col-md-4">
-                    Nazwa usługi:
+                    Login użytkownika:
                 </div>
-                <div class="col-md-8 form-group">
-                    <input class="form-control" type="text" name="name" ng-model="serviceData.name" ng-required="true">
-                    <div ng-show="serviceForm.name.$error.required">Pole jest wymagane</div>
+                <div class="col-md-8 form-group"
+                     ng-class="{ 'has-error': userForm.login.$error.required && userForm.login.$dirty }">
+                    <input class="form-control" type="text" name="login" ng-model="userData.login"
+                           ng-required="createNew" ng-disabled="!createNew">
+                    <div class="color-warning" ng-show="userForm.login.$error.required && userForm.login.$dirty">
+                        Pole jest wymagane
+                    </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4">
-                    Opis usługi:
+                    Hasło:
                 </div>
-                <div class="col-md-8 form-group">
-                    <input class="form-control" type="text" name="description" ng-model="serviceData.description"
-                           ng-required="false">
-                    <div ng-show="serviceForm.description.$error.required">Pole jest wymagane</div>
+                <div class="col-md-8 form-group"
+                     ng-class="{ 'has-error': userForm.password.$error.required && userForm.password.$dirty }">
+                    <input class="form-control" type="password" name="password" ng-model="userData.password"
+                           ng-required="createNew">
+                    <div class="color-warning" ng-show="userForm.password.$error.required && userForm.password.$dirty">
+                        Pole jest wymagane
+                    </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4">
-                    Cena usługi (PLN/h):
+                    Imię:
                 </div>
-                <div class="col-md-8 form-group">
-                    <input class="form-control" type="number" name="price" ng-model="serviceData.price"
+                <div class="col-md-8 form-group"
+                     ng-class="{ 'has-error': userForm.firstName.$error.required && userForm.firstName.$dirty }">
+                    <input class="form-control" type="text" name="firstName" ng-model="userData.firstName"
                            ng-required="true">
-                    <div ng-show="serviceForm.price.$error.required">Pole jest wymagane</div>
-                </div>
-            </div>
-            <div class="row" ng-show="!wholeDay">
-                <div class="col-md-4">
-                    Minimalny czas:
-                </div>
-                <div class="col-md-8 form-group">
-                    <input class="form-control" type="number" name="minTime"
-                           ng-model="serviceData.minTime" min="1" max="{{serviceData.maxTime}}"
-                           ng-required="!wholeDay">
-                    <div ng-show="serviceForm.minTime.$error.required">Pole jest wymagane</div>
-                </div>
-            </div>
-            <div class="row" ng-show="!wholeDay">
-                <div class="col-md-4">
-                    Maksymalny czas:
-                </div>
-                <div class="col-md-8 form-group">
-                    <input class="form-control" type="number" name="maxTime"
-                           ng-model="serviceData.maxTime" min="{{serviceData.minTime}}" max="{{60*24}}"
-                           ng-required="!wholeDay">
-                    <div ng-show="serviceForm.maxTime.$error.required">Pole jest wymagane</div>
+                    <div class="color-warning" ng-show="userForm.firstName.$error.required && userForm.firstName.$dirty">
+                        Pole jest wymagane
+                    </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4">
-                    Usługa całodobowa:
+                    Nazwisko:
                 </div>
-                <div class="col-md-1 form-group">
-                    <input type="checkbox" name="wholeDay"
-                           ng-model="wholeDay" ng-change="changeWholeDay(wholeDay)">
+                <div class="col-md-8 form-group"
+                     ng-class="{ 'has-error': userForm.lastName.$error.required && userForm.lastName.$dirty }">
+                    <input class="form-control" type="text" name="lastName" ng-model="userData.lastName"
+                           ng-required="true">
+                    <div class="color-warning" ng-show="userForm.lastName.$error.required && userForm.lastName.$dirty">
+                        Pole jest wymagane
+                    </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-4">
+                    Email:
+                </div>
+                <div class="col-md-8 form-group"
+                     ng-class="{ 'has-error': (userForm.email.$error.required || userForm.email.$invalid) && userForm.email.$dirty }">
+                    <input class="form-control" type="email" name="email" ng-model="userData.email"
+                           ng-required="true">
+                    <div class="color-warning" ng-show="userForm.email.$error.required && userForm.email.$dirty">
+                        Pole jest wymagane
+                    </div>
+                    <div class="color-warning" ng-show="userForm.email.$invalid && userForm.email.$dirty">
+                        Wpisany tekst nie jest poprawnym adresem email
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <a data-toggle="collapse" data-target="#perm">Uprawnienia</a>
+                        </div>
+                    </div>
+                    <div id="perm" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Może zarządzać usługami:
+                                    </div>
+                                    <div class="col-md-1 form-group">
+                                        <input type="checkbox" name="canManageServices"
+                                               ng-model="userData.permissions.canManageServices">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Może zarządzać użytkownikami:
+                                    </div>
+                                    <div class="col-md-1 form-group">
+                                        <input type="checkbox" name="canManageUsers"
+                                               ng-model="userData.permissions.canManageUsers">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Może zarządzać rezerwacjami:
+                                    </div>
+                                    <div class="col-md-1 form-group">
+                                        <input type="checkbox" name="canManageBookings"
+                                               ng-model="userData.permissions.canManageBookings">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div ng-if="createNew" class="btn-group">
-                <button type="submit" class="btn btn-success" ng-click="saveNewService()"
-                        ng-disabled="serviceForm.$invalid">
+                <button type="submit" class="btn btn-success" ng-click="saveNewUser()"
+                        ng-disabled="userForm.$invalid">
                     Dodaj
                 </button>
             </div>
             <div ng-if="!createNew" class="btn-group">
-                <button type="submit" class="btn btn-success" ng-click="editService()"
-                        ng-disabled="serviceForm.$invalid">
+                <button type="submit" class="btn btn-success" ng-click="editUser()"
+                        ng-disabled="userForm.$invalid">
                     Edytuj
                 </button>
-                <button class="btn btn-warning" ng-click="removeService()">
+                <button class="btn btn-warning" ng-click="removeUser()">
                     Usuń
                 </button>
             </div>

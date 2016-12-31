@@ -27,11 +27,15 @@ db.createCollection("Users", {
                 $type: "string",
                 $exists: true
             },
-            canManageServices: {
+            "permissions.canManageServices": {
                 $type: "boolean",
                 $exists: true
             },
-            canManageUsers: {
+            "permissions.canManageUsers": {
+                $type: "boolean",
+                $exists: true
+            },
+            "permissions.canManageBookings": {
                 $type: "boolean",
                 $exists: true
             }
@@ -76,8 +80,12 @@ db.Users.insert({
     password: "pbubel",
     firstName: true,
     lastName: true,
-    canManageServices: true,
-    canManageUsers: true
+    email: "piotr.bubel@wp.pl",
+    permissions: {
+        canManageServices: true,
+        canManageUsers: true,
+        canManageBookings: true
+    }
 });
 print('* Inserted user into db');
 
