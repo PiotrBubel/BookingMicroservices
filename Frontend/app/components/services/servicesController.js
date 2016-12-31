@@ -1,6 +1,8 @@
 'use strict';
 
-myApp.controller("servicesController", function ($scope, $timeout, servicesFactory) {
+myApp.controller("servicesController", function ($scope, $timeout, servicesFactory, $rootScope) {
+
+    $scope.canManageServices = $rootScope.globalUser && $rootScope.globalUser.permissions && $rootScope.globalUser.permissions.canManageServices;
 
     $scope.createNew = true;
     $scope.serviceData = {
@@ -9,6 +11,7 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
         minTime: 1,
         maxTime: 2
     };
+
     var clearData = angular.copy($scope.serviceData);
 
     var messageHandler = {};
@@ -52,9 +55,16 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
         servicesFactory.getList()
             .success(function (response) {
                 $scope.services = response.list;
+                if(!$scope.canManageServices){
+                    $scope.changeSelected($scope.services[0]);
+                }
             })
             .error(function (error) {
-                messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
+                if (error.message) {
+                    messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
+                } else {
+                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                }
             });
     };
     refreshList();
@@ -67,7 +77,11 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
                 $scope.createNew = false;
             })
             .error(function (error) {
-                messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
+                if (error.message) {
+                    messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
+                } else {
+                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                }
             });
     };
 
@@ -90,7 +104,11 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
                 refreshList();
             })
             .error(function (error) {
-                messageHandler.showErrorMessage('Błąd ', error.message);
+                if (error.message) {
+                    messageHandler.showErrorMessage('Błąd ', error.message);
+                } else {
+                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                }
             });
     };
 
@@ -102,7 +120,11 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
                 $scope.setNew();
             })
             .error(function (error) {
-                messageHandler.showErrorMessage('Błąd ', error.message);
+                if (error.message) {
+                    messageHandler.showErrorMessage('Błąd ', error.message);
+                } else {
+                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                }
             });
     };
 
@@ -116,7 +138,11 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
                 $scope.changeSelected($scope.serviceData.name);
             })
             .error(function (error) {
-                messageHandler.showErrorMessage('Błąd ', error.message);
+                if (error.message) {
+                    messageHandler.showErrorMessage('Błąd ', error.message);
+                } else {
+                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                }
             });
     };
 

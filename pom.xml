@@ -15,6 +15,7 @@
         <module>MongoUsersDatabaseProxy</module>
         <module>ServicesManagement</module>
         <module>UsersManagement</module>
+        <module>AuthService</module>
         <module>RestApi</module>
         <module>Frontend</module>
     </modules>

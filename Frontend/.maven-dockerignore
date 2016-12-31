@@ -2,3 +2,4 @@
 readme.md
 *.iml
 pom.xml
+nginx.conf

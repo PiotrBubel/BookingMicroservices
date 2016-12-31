@@ -1,0 +1,122 @@
+<div class="row">
+    <div class="col-md-6">
+        <h4 class="form-header">Zaloguj się</h4>
+        <form name="loginForm" novalidate>
+            <div class="row">
+                <div class="col-md-4">
+                    Login użytkownika:
+                </div>
+                <div class="col-md-8 form-group"
+                     ng-class="{ 'has-error': loginForm.login.$error.required && loginForm.login.$dirty }">
+                    <input class="form-control" type="text" name="login" ng-model="loginData.login" ng-required="true">
+                    <div class="color-warning" ng-show="loginForm.login.$error.required && loginForm.login.$dirty">
+                        Pole jest wymagane
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    Hasło:
+                </div>
+                <div class="col-md-8 form-group"
+                     ng-class="{ 'has-error': loginForm.password.$error.required && loginForm.password.$dirty }">
+                    <input class="form-control" type="password" name="password" ng-model="loginData.password" ng-required="true">
+                    <div class="color-warning" ng-show="loginForm.password.$error.required && loginForm.password.$dirty">
+                        Pole jest wymagane
+                    </div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-success" ng-click="login(loginData.login, loginData.password)"
+                        ng-disabled="loginForm.$invalid">
+                    Zaloguj
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-6">
+        <h4 class="form-header">Utwórz konto</h4>
+        <form name="newUserForm" novalidate>
+            <div class="row">
+                <div class="col-md-4">
+                    Login użytkownika:
+                </div>
+                <div class="col-md-8 form-group"
+                     ng-class="{ 'has-error': newUserForm.login.$error.required && newUserForm.login.$dirty }">
+                    <input class="form-control" type="text" name="login" ng-model="userData.login">
+                    <div class="color-warning" ng-show="newUserForm.login.$error.required && newUserForm.login.$dirty">
+                        Pole jest wymagane
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    Hasło:
+                </div>
+                <div class="col-md-8 form-group"
+                     ng-class="{ 'has-error': newUserForm.password.$error.required && newUserForm.password.$dirty }">
+                    <input class="form-control" type="password" name="password" ng-model="userData.password">
+                    <div class="color-warning" ng-show="newUserForm.password.$error.required && newUserForm.password.$dirty">
+                        Pole jest wymagane
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    Imię:
+                </div>
+                <div class="col-md-8 form-group"
+                     ng-class="{ 'has-error': newUserForm.firstName.$error.required && newUserForm.firstName.$dirty }">
+                    <input class="form-control" type="text" name="firstName" ng-model="userData.firstName"
+                           ng-required="true">
+                    <div class="color-warning"
+                         ng-show="newUserForm.firstName.$error.required && newUserForm.firstName.$dirty">
+                        Pole jest wymagane
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    Nazwisko:
+                </div>
+                <div class="col-md-8 form-group"
+                     ng-class="{ 'has-error': newUserForm.lastName.$error.required && newUserForm.lastName.$dirty }">
+                    <input class="form-control" type="text" name="lastName" ng-model="userData.lastName"
+                           ng-required="true">
+                    <div class="color-warning" ng-show="newUserForm.lastName.$error.required && newUserForm.lastName.$dirty">
+                        Pole jest wymagane
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    Email:
+                </div>
+                <div class="col-md-8 form-group"
+                     ng-class="{ 'has-error': (newUserForm.email.$error.required || newUserForm.email.$invalid) && newUserForm.email.$dirty }">
+                    <input class="form-control" type="email" name="email" ng-model="userData.email"
+                           ng-required="true">
+                    <div class="color-warning" ng-show="newUserForm.email.$error.required && newUserForm.email.$dirty">
+                        Pole jest wymagane
+                    </div>
+                    <div class="color-warning" ng-show="newUserForm.email.$invalid && newUserForm.email.$dirty">
+                        Wpisany tekst nie jest poprawnym adresem email
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-success" ng-click="saveNewUser()"
+                        ng-disabled="newUserForm.$invalid">
+                    Zapisz
+                </button>
+            </div>
+        </form>
+        <div class="message-container">
+            <div ng-model="errorMessage" ng-show="showErrorMessage" class="alert alert-danger fade in"><strong>
+                {{ errorMessage }}</strong> {{ errorDescription }}
+            </div>
+        </div>
+    </div>
+</div>

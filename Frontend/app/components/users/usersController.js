@@ -1,6 +1,8 @@
 'use strict';
 
-myApp.controller("usersController", function ($scope, $timeout, usersFactory) {
+myApp.controller("usersController", function ($scope, $timeout, usersFactory, $rootScope) {
+
+    $scope.canManageUsers =  $rootScope.globalUser && $rootScope.globalUser.permissions && $rootScope.globalUser.permissions.canManageUsers;
 
     $scope.createNew = true;
     $scope.userData = {
@@ -56,7 +58,11 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory) {
                 $scope.users = response.list;
             })
             .error(function (error) {
-                messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
+                if (error.message) {
+                    messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
+                } else {
+                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                }
             });
     };
     refreshList();
@@ -68,7 +74,11 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory) {
                 $scope.createNew = false;
             })
             .error(function (error) {
-                messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
+                if (error.message) {
+                    messageHandler.showErrorMessage('Błąd pobierania danych', error.message);
+                } else {
+                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                }
             });
     };
 
@@ -92,7 +102,11 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory) {
                 refreshList();
             })
             .error(function (error) {
-                messageHandler.showErrorMessage('Błąd ', error.message);
+                if (error.message) {
+                    messageHandler.showErrorMessage('Błąd ', error.message);
+                } else {
+                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                }
             });
     };
 
@@ -104,7 +118,11 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory) {
                 $scope.setNew();
             })
             .error(function (error) {
-                messageHandler.showErrorMessage('Błąd ', error.message);
+                if (error.message) {
+                    messageHandler.showErrorMessage('Błąd ', error.message);
+                } else {
+                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                }
             });
     };
 
@@ -118,7 +136,11 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory) {
                 $scope.changeSelected($scope.userData.login);
             })
             .error(function (error) {
-                messageHandler.showErrorMessage('Błąd ', error.message);
+                if (error.message) {
+                    messageHandler.showErrorMessage('Błąd ', error.message);
+                } else {
+                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                }
             });
     };
 

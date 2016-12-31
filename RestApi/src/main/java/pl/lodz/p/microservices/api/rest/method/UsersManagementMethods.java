@@ -5,6 +5,5 @@ public enum UsersManagementMethods {
     SAVE_NEW_USER,
     GET_USERS_LIST,
     GET_USER_DETAILS,
-    EDIT_USER,
-    LOGIN
+    EDIT_USER
 }
