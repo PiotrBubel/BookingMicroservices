@@ -122,7 +122,6 @@ public class MongoUsersDatabaseProxyService extends AbstractVerticle {
             if (response.succeeded()) {
                 if (response.result().size() > 0) {
                     JsonObject result = response.result().get(0);
-                    result.remove("password");
                     inMessage.reply(result);
                     log.info("Load user details from database succeeded. " + result);
                 } else {

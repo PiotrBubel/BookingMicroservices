@@ -33,6 +33,10 @@ services:
     image: microservices/usersmanagement:latest
     restart: always
 
+  authservice:
+    image: microservices/authservice:latest
+    restart: always
+
   restapi:
     image: microservices/restapi:latest
     ports:

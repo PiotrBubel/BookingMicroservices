@@ -14,6 +14,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
+import pl.lodz.p.microservices.api.rest.method.AuthServiceMethods;
 import pl.lodz.p.microservices.api.rest.method.ServicesManagementMethods;
 import pl.lodz.p.microservices.api.rest.method.UsersManagementMethods;
 
@@ -22,12 +23,14 @@ import java.util.Set;
 
 public class RestApi extends AbstractVerticle {
     private static final String SERVICES_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.services.ServicesManagement";
-    private static final String USERS_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.services.UsersManagement";
+    private static final String USERS_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.users.UsersManagement";
+    private static final String AUTH_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.auth.AuthService";
 
     private static final String METHOD_KEY = "method";
 
     private static final String SERVICES_ENDPOINT = "/api/services";
     private static final String USERS_ENDPOINT = "/api/users";
+    private static final String AUTHENTICATE_ENDPOINT = "/api/authenticate";
 
     private static final Logger log = LoggerFactory.getLogger(RestApi.class);
 
@@ -103,6 +106,11 @@ public class RestApi extends AbstractVerticle {
                 UsersManagementMethods.EDIT_USER,
                 USERS_MANAGEMENT_SERVICE_ADDRESS,
                 "login",
+                context.getBodyAsJson()));
+
+        router.post(AUTHENTICATE_ENDPOINT).handler(context -> requestHandler(context,
+                AuthServiceMethods.LOGIN,
+                AUTH_SERVICE_ADDRESS,
                 context.getBodyAsJson()));
 
         vertx.createHttpServer().requestHandler(router::accept).listen(8094);

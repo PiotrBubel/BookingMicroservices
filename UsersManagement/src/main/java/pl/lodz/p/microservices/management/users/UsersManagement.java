@@ -13,10 +13,11 @@ import io.vertx.core.logging.LoggerFactory;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
+import pl.lodz.p.microservices.management.users.Methods;
 
 public class UsersManagement extends AbstractVerticle {
 
-    private static final String USERS_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.services.UsersManagement";
+    private static final String USERS_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.users.UsersManagement";
     private static final String DATABASE_USERS_PROXY_SERVICE_ADDRESS = "pl.lodz.p.microservices.proxy.mongo.DatabaseUsersProxyService";
 
     private static final String METHOD_KEY = "method";
@@ -99,7 +100,9 @@ public class UsersManagement extends AbstractVerticle {
                 new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_USER_DETAILS"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
-                        inMessage.reply(response.result().body());
+                        JsonObject result = response.result().body();
+                        result.remove("password");
+                        inMessage.reply(result);
                     } else {
                         ReplyException cause = (ReplyException) response.cause();
                         inMessage.fail(cause.failureCode(), cause.getMessage());

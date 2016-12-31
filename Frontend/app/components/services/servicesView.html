@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-4">
-        <p>Dostępne usługi:</p>
+        <h4 class="form-header">Dostępne usługi:</h4>
         <div class="list-group">
             <div ng-repeat="name in services">
                 <a ng-click="changeSelected(name)" class="list-group-item"
@@ -8,95 +8,184 @@
                     {{ name }}
                 </a>
             </div>
-            <a class="list-group-item list-group-item-success" ng-click="setNew()">-- nowa --</a>
+            <a ng-if="canManageServices" class="list-group-item list-group-item-success" ng-click="setNew()">-- nowa --</a>
         </div>
     </div>
 
-    <!--<service-viewer name="{{ services[0] }}"></service-viewer>-->
     <div class="col-md-8">
-        <form name="serviceForm" novalidate>
+        <div ng-if="canManageServices">
+            <h4 class="form-header" ng-if="!createNew">Edycja usługi {{ serviceData.name }}</h4>
+            <h4 class="form-header" ng-if="createNew">Tworzenie nowej usługi</h4>
+            <form name="serviceForm" novalidate>
+                <div class="row">
+                    <div class="col-md-4">
+                        Nazwa usługi:
+                    </div>
+                    <div class="col-md-8 form-group"
+                         ng-class="{ 'has-error': serviceForm.name.$error.required && serviceForm.name.$dirty }">
+                        <input class="form-control" type="text" name="name" ng-model="serviceData.name"
+                               ng-required="true"
+                               ng-disabled="!createNew">
+                        <div class="color-warning"
+                             ng-show="serviceForm.name.$error.required && serviceForm.name.$dirty">
+                            Pole jest wymagane
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        Opis usługi:
+                    </div>
+                    <div class="col-md-8 form-group"
+                         ng-class="{ 'has-error': serviceForm.description.$error.required && serviceForm.description.$dirty }">
+                        <input class="form-control" type="text" name="description" ng-model="serviceData.description"
+                               ng-required="false">
+                        <div class="color-warning"
+                             ng-show="serviceForm.description.$error.required && serviceForm.description.$dirty">Pole
+                            jest
+                            wymagane
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        Cena usługi (PLN/h):
+                    </div>
+                    <div class="col-md-8 form-group"
+                         ng-class="{ 'has-error': serviceForm.price.$error.required && serviceForm.price.$dirty }">
+                        <input class="form-control" type="number" name="price" ng-model="serviceData.price"
+                               ng-required="true">
+                        <div class="color-warning"
+                             ng-show="serviceForm.price.$error.required && serviceForm.price.$dirty">
+                            Pole jest wymagane
+                        </div>
+                    </div>
+                </div>
+                <div class="row" ng-show="!wholeDay">
+                    <div class="col-md-4">
+                        Minimalny czas:
+                    </div>
+                    <div class="col-md-8 form-group"
+                         ng-class="{ 'has-error': serviceForm.minTime.$error.required && serviceForm.minTime.$dirty }">
+                        <input class="form-control" type="number" name="minTime"
+                               ng-model="serviceData.minTime" min="1" max="{{serviceData.maxTime}}"
+                               ng-required="!wholeDay">
+                        <div class="color-warning"
+                             ng-show="serviceForm.minTime.$error.required && serviceForm.minTime.$dirty">Pole jest
+                            wymagane
+                        </div>
+                    </div>
+                </div>
+                <div class="row" ng-show="!wholeDay">
+                    <div class="col-md-4">
+                        Maksymalny czas:
+                    </div>
+                    <div class="col-md-8 form-group"
+                         ng-class="{ 'has-error': serviceForm.maxTime.$error.required && serviceForm.maxTime.$dirty }">
+                        <input class="form-control" type="number" name="maxTime"
+                               ng-model="serviceData.maxTime" min="{{serviceData.minTime}}" max="{{60*24}}"
+                               ng-required="!wholeDay">
+                        <div class="color-warning"
+                             ng-show="serviceForm.maxTime.$error.required && serviceForm.maxTime.$dirty">Pole jest
+                            wymagane
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        Usługa całodobowa:
+                    </div>
+                    <div class="col-md-1 form-group">
+                        <input type="checkbox" name="wholeDay"
+                               ng-model="wholeDay" ng-change="changeWholeDay(wholeDay)">
+                    </div>
+                </div>
+                <div ng-if="createNew" class="btn-group">
+                    <button type="submit" class="btn btn-success" ng-click="saveNewService()"
+                            ng-disabled="serviceForm.$invalid">
+                        Dodaj
+                    </button>
+                </div>
+                <div ng-if="!createNew" class="btn-group">
+                    <button type="submit" class="btn btn-success" ng-click="editService()"
+                            ng-disabled="serviceForm.$invalid">
+                        Edytuj
+                    </button>
+                    <button class="btn btn-warning" ng-click="removeService()">
+                        Usuń
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div ng-if="!canManageServices">
+            <h4 class="form-header">Informacje o usłudze {{ serviceData.name }}</h4>
             <div class="row">
                 <div class="col-md-4">
                     Nazwa usługi:
                 </div>
-                <div class="col-md-8 form-group" ng-class="{ 'has-error': serviceForm.name.$error.required && serviceForm.name.$dirty }">
-                    <input class="form-control" type="text" name="name" ng-model="serviceData.name" ng-required="true" ng-disabled="!createNew">
-                    <div class="color-warning" ng-show="serviceForm.name.$error.required && serviceForm.name.$dirty">Pole jest wymagane</div>
+                <div class="col-md-8">
+                    {{ serviceData.name }}
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4">
                     Opis usługi:
                 </div>
-                <div class="col-md-8 form-group" ng-class="{ 'has-error': serviceForm.description.$error.required && serviceForm.description.$dirty }">
-                    <input class="form-control" type="text" name="description" ng-model="serviceData.description"
-                           ng-required="false">
-                    <div class="color-warning" ng-show="serviceForm.description.$error.required && serviceForm.description.$dirty">Pole jest wymagane</div>
+                <div class="col-md-8">
+                    {{ serviceData.description }}
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4">
                     Cena usługi (PLN/h):
                 </div>
-                <div class="col-md-8 form-group" ng-class="{ 'has-error': serviceForm.price.$error.required && serviceForm.price.$dirty }">
-                    <input class="form-control" type="number" name="price" ng-model="serviceData.price"
-                           ng-required="true">
-                    <div class="color-warning" ng-show="serviceForm.price.$error.required && serviceForm.price.$dirty">Pole jest wymagane</div>
+                <div class="col-md-8">
+                    {{ serviceData.price }}
                 </div>
             </div>
-            <div class="row" ng-show="!wholeDay">
-                <div class="col-md-4">
-                    Minimalny czas:
+            <div ng-if="serviceData.minTime !== serviceData.maxTime">
+                <div class="row">
+                    <div class="col-md-4">
+                        Minimalny czas:
+                    </div>
+                    <div class="col-md-8">
+                        {{ serviceData.minTime }}
+                    </div>
                 </div>
-                <div class="col-md-8 form-group" ng-class="{ 'has-error': serviceForm.minTime.$error.required && serviceForm.minTime.$dirty }">
-                    <input class="form-control" type="number" name="minTime"
-                           ng-model="serviceData.minTime" min="1" max="{{serviceData.maxTime}}"
-                           ng-required="!wholeDay">
-                    <div class="color-warning" ng-show="serviceForm.minTime.$error.required && serviceForm.minTime.$dirty">Pole jest wymagane</div>
-                </div>
-            </div>
-            <div class="row" ng-show="!wholeDay">
-                <div class="col-md-4">
-                    Maksymalny czas:
-                </div>
-                <div class="col-md-8 form-group" ng-class="{ 'has-error': serviceForm.maxTime.$error.required && serviceForm.maxTime.$dirty }">
-                    <input class="form-control" type="number" name="maxTime"
-                           ng-model="serviceData.maxTime" min="{{serviceData.minTime}}" max="{{60*24}}"
-                           ng-required="!wholeDay">
-                    <div class="color-warning" ng-show="serviceForm.maxTime.$error.required && serviceForm.maxTime.$dirty">Pole jest wymagane</div>
+                <div class="row">
+                    <div class="col-md-4">
+                        Maksymalny czas:
+                    </div>
+                    <div class="col-md-8">
+                        {{ serviceData.maxTime }}
+                    </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-4">
-                    Usługa całodobowa:
+            <div ng-if="serviceData.minTime === serviceData.maxTime">
+                <div ng-if="serviceData.maxTime === 60 * 24" class="row">
+                    <div class="col-md-4">
+                        Usługa całodobowa
+                    </div>
                 </div>
-                <div class="col-md-1 form-group">
-                    <input type="checkbox" name="wholeDay"
-                           ng-model="wholeDay" ng-change="changeWholeDay(wholeDay)">
+                <div ng-if="serviceData.maxTime !== 60 * 24" class="row">
+                    <div class="col-md-4">
+                        Czas:
+                    </div>
+                    <div class="col-md-8">
+                        {{ serviceData.maxTime }}
+                    </div>
                 </div>
             </div>
-            <div ng-if="createNew" class="btn-group">
-                <button type="submit" class="btn btn-success" ng-click="saveNewService()"
-                        ng-disabled="serviceForm.$invalid">
-                    Dodaj
-                </button>
-            </div>
-            <div ng-if="!createNew" class="btn-group">
-                <button type="submit" class="btn btn-success" ng-click="editService()"
-                        ng-disabled="serviceForm.$invalid">
-                    Edytuj
-                </button>
-                <button class="btn btn-warning" ng-click="removeService()">
-                    Usuń
-                </button>
-            </div>
-        </form>
+        </div>
+
         <div class="message-container">
             <div ng-model="errorMessage" ng-show="showErrorMessage" class="alert alert-danger fade in"><strong>
                 {{ errorMessage }}</strong> {{ errorDescription }}
             </div>
-            <div ng-model="successMessage" ng-show="showSuccessMessage" class="alert alert-success fade in"><strong>
-                {{ successMessage }}</strong> {{ successDescription }}
+            <div ng-model="successMessage" ng-show="showSuccessMessage" class="alert alert-success fade in">
+                <strong>
+                    {{ successMessage }}</strong> {{ successDescription }}
             </div>
         </div>
     </div>

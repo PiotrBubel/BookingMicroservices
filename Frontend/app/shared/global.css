@@ -11,9 +11,13 @@ body > .container {
 }
 
 .container-margin-bottom {
-    margin-bottom: 75px;
+    margin-bottom: 60px;
 }
 
 .color-warning {
     color: darkred;
+}
+
+.form-header {
+    padding-bottom: 15px;
 }
