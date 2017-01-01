@@ -36,14 +36,12 @@ myApp.controller("loginController", function ($scope, $timeout, usersFactory, lo
     };
 
     $scope.saveNewUser = function () {
-        console.log('$scope.userData', $scope.userData);
         usersFactory.create($scope.userData)
             .success(function () {
-                console.log('utworzono pomyślnie');
                 $scope.login($scope.userData.login, $scope.userData.password);
             })
             .error(function (error) {
-                if (error.message) {
+                if (error) {
                     messageHandler.showErrorMessage('Błąd ', error.message);
                 } else {
                     messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
@@ -59,7 +57,7 @@ myApp.controller("loginController", function ($scope, $timeout, usersFactory, lo
                 $location.path('/account');
             })
             .error(function (error) {
-                if (error.message) {
+                if (error) {
                     messageHandler.showErrorMessage('Błąd ', error.message);
                 } else {
                     messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");

@@ -113,9 +113,13 @@
                 </button>
             </div>
         </form>
-        <div class="message-container">
-            <div ng-model="errorMessage" ng-show="showErrorMessage" class="alert alert-danger fade in"><strong>
-                {{ errorMessage }}</strong> {{ errorDescription }}
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="message-container">
+                <div ng-model="errorMessage" ng-show="showErrorMessage" class="alert alert-danger fade in"><strong>
+                    {{ errorMessage }}</strong> {{ errorDescription }}
+                </div>
             </div>
         </div>
     </div>

@@ -11,15 +11,15 @@ db.createCollection("Services", {
                 $type: "string",
                 $exists: true
             },
-            minTime: {
-                $type: "int",
-                $exists: true
-            },
-            maxTime: {
-                $type: "int",
-                $exists: true
-            },
             price: {
+                $type: "int",
+                $exists: true
+            },
+            timePeriod: {
+                $type: "int",
+                $exists: true
+            },
+            maxPeriods: {
                 $type: "int",
                 $exists: true
             },
@@ -39,24 +39,25 @@ print('* Created collection Services. All collections: ' + db.getCollectionNames
 
 db.Bookings.drop();
 db.createCollection("Bookings", {
-    capped: true,
-    size: 512000000,
-    max: 100000,
     validator: {
         $and: [{
             serviceName: {
                 $type: "string",
                 $exists: true
             },
-            UID: {
+            userLogin: {
+                $type: "string",
+                $exists: true
+            },
+            startDate: {
+                $type: "string",
+                $exists: true
+            },
+            periods: {
                 $type: "int",
                 $exists: true
             },
-            time: {
-                $type: "int",
-                $exists: true
-            },
-            comment: {
+            description: {
                 $type: "string",
                 $exists: true
             }
@@ -66,7 +67,7 @@ db.createCollection("Bookings", {
 });
 
 db.Bookings.createIndex(
-    {UID: 1}
+    {userLogin: 1}
 );
 print('* Created collection Bookings. All collections: ' + db.getCollectionNames());
 
@@ -109,33 +110,49 @@ print('* Created user BookingsServiceApp, pwd: BookingsServicep@Ssw0rd');
 
 db.Services.insert({
     name: "usluga1",
-    minTime: NumberInt(15),
-    maxTime: NumberInt(30),
+    timePeriod: NumberInt(60),
+    maxPeriods: NumberInt(2),
     price: NumberInt(15),
     description: "opis uslugi 1"
 });
 
 db.Services.insert({
     name: "usluga2",
-    minTime: NumberInt(15),
-    maxTime: NumberInt(30),
+    timePeriod: NumberInt(30),
+    maxPeriods: NumberInt(4),
     price: NumberInt(15),
     description: "opis uslugi 2"
 });
 
 db.Services.insert({
     name: "usluga3",
-    minTime: NumberInt(15),
-    maxTime: NumberInt(15),
+    timePeriod: NumberInt(15),
+    maxPeriods: NumberInt(6),
     price: NumberInt(30),
     description: "opis uslugi 3"
 });
 
 db.Services.insert({
     name: "usluga4",
-    minTime: NumberInt(15),
-    maxTime: NumberInt(15),
+    timePeriod: NumberInt(15),
+    maxPeriods: NumberInt(4),
     price: NumberInt(60),
+    description: "opis uslugi 4"
+});
+
+db.Bookings.insert({
+    serviceName: "usluga4",
+    userLogin: "pbubel",
+    startDate: "2017-01-02;10:00",
+    periods: NumberInt(3),
+    description: "opis uslugi 4"
+});
+
+db.Bookings.insert({
+    serviceName: "usluga4",
+    userLogin: "pbubel",
+    startDate: "2017-01-02;13:00",
+    periods: NumberInt(3),
     description: "opis uslugi 4"
 });
 

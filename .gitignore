@@ -1,6 +1,7 @@
 *.iml
 */target
 .idea
+*.vertx
 *.jar
 *.class
 *.log
