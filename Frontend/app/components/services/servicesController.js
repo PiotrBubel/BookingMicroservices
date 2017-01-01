@@ -8,11 +8,15 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
     $scope.serviceData = {
         description: '',
         price: 1,
-        minTime: 1,
-        maxTime: 2
+        timePeriod: 60,
+        maxPeriods: 2
+    };
+    $scope.helper = {
+        wholeDay: false
     };
 
     var clearData = angular.copy($scope.serviceData);
+    var rawData = angular.copy($scope.serviceData);
 
     var messageHandler = {};
     messageHandler.showErrorMessage = function (message, description) {
@@ -55,12 +59,12 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
         servicesFactory.getList()
             .success(function (response) {
                 $scope.services = response.list;
-                if(!$scope.canManageServices){
+                if (!$scope.canManageServices) {
                     $scope.changeSelected($scope.services[0]);
                 }
             })
             .error(function (error) {
-                if (error.message) {
+                if (error) {
                     messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
                 } else {
                     messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
@@ -73,11 +77,12 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
         servicesFactory.getDetails(name)
             .success(function (response) {
                 $scope.serviceData = response;
-                $scope.wholeDay = ($scope.serviceData.maxTime === 24 * 60) && ($scope.serviceData.minTime === $scope.serviceData.maxTime);
+                rawData = response;
+                $scope.helper.wholeDay = ($scope.serviceData.maxPeriods * $scope.serviceData.timePeriod === 60 * 24);
                 $scope.createNew = false;
             })
             .error(function (error) {
-                if (error.message) {
+                if (error) {
                     messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
                 } else {
                     messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
@@ -92,10 +97,6 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
     };
 
     $scope.saveNewService = function () {
-        console.log('$scope.serviceData', $scope.serviceData);
-        if ($scope.wholeDay) {
-            $scope.serviceData.minTime = $scope.serviceData.maxTime = 60 * 24;
-        }
         servicesFactory.create($scope.serviceData)
             .success(function () {
                 messageHandler.showSuccessMessage('Dodano pomyślnie');
@@ -104,7 +105,7 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
                 refreshList();
             })
             .error(function (error) {
-                if (error.message) {
+                if (error) {
                     messageHandler.showErrorMessage('Błąd ', error.message);
                 } else {
                     messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
@@ -120,7 +121,7 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
                 $scope.setNew();
             })
             .error(function (error) {
-                if (error.message) {
+                if (error) {
                     messageHandler.showErrorMessage('Błąd ', error.message);
                 } else {
                     messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
@@ -138,7 +139,7 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
                 $scope.changeSelected($scope.serviceData.name);
             })
             .error(function (error) {
-                if (error.message) {
+                if (error) {
                     messageHandler.showErrorMessage('Błąd ', error.message);
                 } else {
                     messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
@@ -148,18 +149,17 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
 
     $scope.changeWholeDay = function (wholeDay) {
         if (wholeDay) {
-            $scope.serviceData.minTime = $scope.serviceData.maxTime = 24 * 60;
+            $scope.serviceData.maxPeriods = 1;
+            $scope.serviceData.timePeriod = 60 * 24;
         } else {
-            $scope.serviceData.minTime = 1;
-            $scope.serviceData.maxTime = 2;
+            $scope.serviceData.maxPeriods = rawData.maxPeriods;
+            if (rawData.timePeriod >= 60 * 24) {
+                $scope.serviceData.timePeriod = (60 * 24) - 1;
+            } else {
+                $scope.serviceData.timePeriod = rawData.timePeriod;
+            }
         }
     };
-
-    // $scope.$watch('serviceData.maxTime + serviceData.minTime', function (newValue, oldValue) {
-    //     if (!angular.equals(newValue, oldValue)) {
-    //         $scope.wholeDay = ($scope.serviceData.maxTime === 24 * 60) && ($scope.serviceData.minTime === $scope.serviceData.maxTime);
-    //     }
-    // });
 
     $scope.exists = function (givenObject) {
         return typeof givenObject !== 'undefined';

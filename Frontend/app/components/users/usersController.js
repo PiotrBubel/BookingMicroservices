@@ -58,7 +58,7 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory, $r
                 $scope.users = response.list;
             })
             .error(function (error) {
-                if (error.message) {
+                if (error) {
                     messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
                 } else {
                     messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
@@ -74,7 +74,7 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory, $r
                 $scope.createNew = false;
             })
             .error(function (error) {
-                if (error.message) {
+                if (error) {
                     messageHandler.showErrorMessage('Błąd pobierania danych', error.message);
                 } else {
                     messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
@@ -93,7 +93,6 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory, $r
     };
 
     $scope.saveNewUser = function () {
-        console.log('$scope.userData', $scope.userData);
         usersFactory.create($scope.userData)
             .success(function () {
                 messageHandler.showSuccessMessage('Dodano pomyślnie');
@@ -102,7 +101,7 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory, $r
                 refreshList();
             })
             .error(function (error) {
-                if (error.message) {
+                if (error) {
                     messageHandler.showErrorMessage('Błąd ', error.message);
                 } else {
                     messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
@@ -118,7 +117,7 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory, $r
                 $scope.setNew();
             })
             .error(function (error) {
-                if (error.message) {
+                if (error) {
                     messageHandler.showErrorMessage('Błąd ', error.message);
                 } else {
                     messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
@@ -136,7 +135,7 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory, $r
                 $scope.changeSelected($scope.userData.login);
             })
             .error(function (error) {
-                if (error.message) {
+                if (error) {
                     messageHandler.showErrorMessage('Błąd ', error.message);
                 } else {
                     messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");

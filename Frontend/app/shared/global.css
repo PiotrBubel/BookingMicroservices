@@ -21,3 +21,11 @@ body > .container {
 .form-header {
     padding-bottom: 15px;
 }
+
+.message-container {
+    padding: 20px 20px 20px 20px;
+}
+
+.not-resizable {
+    resize: none;
+}

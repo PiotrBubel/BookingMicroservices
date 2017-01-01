@@ -15,6 +15,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import pl.lodz.p.microservices.api.rest.method.AuthServiceMethods;
+import pl.lodz.p.microservices.api.rest.method.BookingManagementMethods;
 import pl.lodz.p.microservices.api.rest.method.ServicesManagementMethods;
 import pl.lodz.p.microservices.api.rest.method.UsersManagementMethods;
 
@@ -25,11 +26,13 @@ public class RestApi extends AbstractVerticle {
     private static final String SERVICES_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.services.ServicesManagement";
     private static final String USERS_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.users.UsersManagement";
     private static final String AUTH_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.auth.AuthService";
+    private static final String BOOKINGS_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.booking.BookingManagement";
 
     private static final String METHOD_KEY = "method";
 
     private static final String SERVICES_ENDPOINT = "/api/services";
     private static final String USERS_ENDPOINT = "/api/users";
+    private static final String BOOKING_ENDPOINT = "/api/booking";
     private static final String AUTHENTICATE_ENDPOINT = "/api/authenticate";
 
     private static final Logger log = LoggerFactory.getLogger(RestApi.class);
@@ -108,9 +111,37 @@ public class RestApi extends AbstractVerticle {
                 "login",
                 context.getBodyAsJson()));
 
+
+        // Auth endpoint
         router.post(AUTHENTICATE_ENDPOINT).handler(context -> requestHandler(context,
                 AuthServiceMethods.LOGIN,
                 AUTH_SERVICE_ADDRESS,
+                context.getBodyAsJson()));
+
+        // Booking endpoint
+        router.get(BOOKING_ENDPOINT).handler(context -> requestHandler(context,
+                BookingManagementMethods.GET_BOOKINGS_LIST,
+                BOOKINGS_MANAGEMENT_SERVICE_ADDRESS));
+
+        router.get(BOOKING_ENDPOINT + "/:id").handler(context -> requestHandler(context,
+                BookingManagementMethods.GET_BOOKING_DETAILS,
+                BOOKINGS_MANAGEMENT_SERVICE_ADDRESS,
+                "id"));
+
+        router.delete(BOOKING_ENDPOINT + "/:id").handler(context -> requestHandler(context,
+                BookingManagementMethods.DELETE_BOOKING,
+                BOOKINGS_MANAGEMENT_SERVICE_ADDRESS,
+                "id"));
+
+        router.post(BOOKING_ENDPOINT).handler(context -> requestHandler(context,
+                BookingManagementMethods.SAVE_NEW_BOOKING,
+                BOOKINGS_MANAGEMENT_SERVICE_ADDRESS,
+                context.getBodyAsJson()));
+
+        router.put(BOOKING_ENDPOINT + "/:id").handler(context -> requestHandler(context,
+                BookingManagementMethods.EDIT_BOOKING,
+                BOOKINGS_MANAGEMENT_SERVICE_ADDRESS,
+                "id",
                 context.getBodyAsJson()));
 
         vertx.createHttpServer().requestHandler(router::accept).listen(8094);

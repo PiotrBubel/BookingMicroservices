@@ -11,8 +11,8 @@ var myApp = angular.module('myApp', ['ngRoute', 'ngMessages', 'ngCookies'])
                 controller: 'servicesController',
                 templateUrl: '/app/components/services/servicesView.html'
             }).when('/bookings', {
-                controller: 'navbarController',
-                templateUrl: '/app/components/bookings/bookingsView.html'
+                controller: 'bookingController',
+                templateUrl: '/app/components/booking/bookingView.html'
             }).when('/users', {
                 controller: 'usersController',
                 templateUrl: '/app/components/users/usersView.html'
@@ -29,17 +29,10 @@ var myApp = angular.module('myApp', ['ngRoute', 'ngMessages', 'ngCookies'])
         }]);
 
 myApp.controller("navbarController", function ($http, $scope, $cookies, $location, $rootScope) {
-    console.log('main controller');
-    console.log('check cookies');
-    var user = $cookies.getObject('user');
-    console.log('cookie', user);
-    $rootScope.globalUser = user;
-    console.log('$rootScope.user', $rootScope.globalUser);
+    $rootScope.globalUser = $cookies.getObject('user');
 
     $scope.logout = function () {
-        //remove cookies
         $cookies.remove('user');
         delete($rootScope.globalUser);
-        console.log('remove cookies');
     };
 });

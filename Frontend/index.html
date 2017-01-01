@@ -5,8 +5,6 @@
     <title>Booking Microservices</title>
     <link rel="stylesheet" type="text/css" href="/assets/lib/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/app/shared/global.css">
-    <link rel="stylesheet" type="text/css" href="/app/components/services/servicesStyle.css">
-    <link rel="stylesheet" type="text/css" href="/app/components/users/usersStyle.css">
     <base href="/">
 </head>
 <body>
@@ -33,7 +31,8 @@
                     <li ng-if="globalUser.login"><a ng-href="#!/account">Moje konto</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li ng-if="globalUser.login"><a ng-href="#!/login" ng-click="logout()">{{ globalUser.login }} <i> (wyloguj)</i></a>
+                    <li ng-if="globalUser.login"><a ng-href="#!/login" ng-click="logout()">{{ globalUser.login }} <i>
+                        (wyloguj)</i></a>
                     </li>
                     <li ng-if="!globalUser.login"><a ng-href="#!/login">Zaloguj</a></li>
                 </ul>
@@ -46,7 +45,8 @@
 
 <div class="navbar navbar-default navbar-fixed-bottom">
     <div class="container">
-        <p class="navbar-text pull-left">2016 Piotr Bubel Praca Inżynierska. Tworzenie internetowych aplikacji biznesowych przy wykorzystaniu architektury mikroserwisów.</p>
+        <p class="navbar-text pull-left">2016 Piotr Bubel Praca Inżynierska. Tworzenie internetowych aplikacji
+            biznesowych przy wykorzystaniu architektury mikroserwisów.</p>
     </div>
 </div>
 
@@ -68,17 +68,17 @@
 <script src="/assets/lib/bootstrap/js/bootstrap.min.js"></script>
 
 <script src="/app.js"></script>
-<!--<script src="/app/shared/messageHandler.js"></script>-->
 <script src="/app/app.config.js"></script>
 <script src="/app/app.module.js"></script>
 <script src="/app/shared/endpoints/loginFactory.js"></script>
 <script src="/app/shared/endpoints/servicesFactory.js"></script>
 <script src="/app/shared/endpoints/usersFactory.js"></script>
+<script src="/app/shared/endpoints/bookingFactory.js"></script>
 <script src="/app/components/services/servicesController.js"></script>
 <script src="/app/components/users/usersController.js"></script>
 <script src="/app/components/login/loginController.js"></script>
 <script src="/app/components/account/accountController.js"></script>
-<!--<script src="../scripts/controllers.js"></script>-->
-<!--<script src="../scripts/services.js"></script>-->
+<script src="/app/components/booking/bookingController.js"></script>
+
 </body>
 </html>

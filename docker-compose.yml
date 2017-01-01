@@ -33,6 +33,10 @@ services:
     image: microservices/usersmanagement:latest
     restart: always
 
+  bookingmanagement:
+    image: microservices/bookingmanagement:latest
+    restart: always
+
   authservice:
     image: microservices/authservice:latest
     restart: always
