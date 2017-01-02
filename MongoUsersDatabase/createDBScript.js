@@ -9,6 +9,7 @@ db.createCollection("Users", {
         $and: [{
             login: {
                 $type: "string",
+                $regex: "^[A-Za-z0-9_]*$",
                 $exists: true
             },
             password: {
@@ -28,20 +29,21 @@ db.createCollection("Users", {
                 $exists: true
             },
             "permissions.canManageServices": {
-                $type: "boolean",
+                $type: "bool",
                 $exists: true
             },
             "permissions.canManageUsers": {
-                $type: "boolean",
+                $type: "bool",
                 $exists: true
             },
             "permissions.canManageBookings": {
-                $type: "boolean",
+                $type: "bool",
                 $exists: true
             }
         }]
     },
-    validationAction: "error"
+    validationAction: "error",
+    validationLevel: "strict"
 });
 
 db.Users.createIndex(
@@ -75,18 +77,18 @@ db.createUser({
 });
 print('* Created user BookingsServiceUsersApp, pwd: BookingsServicep@Ssw0rd');
 
-db.Users.insert({
+print(db.Users.insert({
     login: "pbubel",
     password: "pbubel",
-    firstName: true,
-    lastName: true,
+    firstName: "P",
+    lastName: "B",
     email: "piotr.bubel@wp.pl",
     permissions: {
         canManageServices: true,
         canManageUsers: true,
         canManageBookings: true
     }
-});
+}));
 print('* Inserted user into db');
 
 print('All collections: ' + db.getCollectionNames());

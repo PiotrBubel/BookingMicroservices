@@ -9,15 +9,15 @@
     <name>MicroservicesBookingServices</name>
 
     <modules>
-        <!--<module>MongoDatabase</module>-->
-        <!--<module>MongoDatabaseProxy</module>-->
-        <!--<module>MongoUsersDatabase</module>-->
-        <!--<module>MongoUsersDatabaseProxy</module>-->
-        <!--<module>ServicesManagement</module>-->
-        <!--<module>UsersManagement</module>-->
-        <!--<module>BookingManagement</module>-->
-        <!--<module>AuthService</module>-->
-        <!--<module>RestApi</module>-->
+        <module>MongoDatabase</module>
+        <module>MongoDatabaseProxy</module>
+        <module>MongoUsersDatabase</module>
+        <module>MongoUsersDatabaseProxy</module>
+        <module>ServicesManagement</module>
+        <module>UsersManagement</module>
+        <module>BookingManagement</module>
+        <module>AuthService</module>
+        <module>RestApi</module>
         <module>Frontend</module>
     </modules>
 </project>

@@ -125,8 +125,8 @@ public class MongoUsersDatabaseProxyService extends AbstractVerticle {
                     inMessage.reply(result);
                     log.info("Load user details from database succeeded. " + result);
                 } else {
-                    log.info("Load user details from database not succeeded. More than one user with login: " + login);
-                    inMessage.fail(500, "More than one user with login: " + login);
+                    log.info("Load user details from database not succeeded. No user with login: " + login);
+                    inMessage.fail(404, "No user with login: " + login);
                 }
             } else {
                 log.error("Load user details from database failed, cause: " + response.cause().getMessage());
@@ -207,12 +207,6 @@ public class MongoUsersDatabaseProxyService extends AbstractVerticle {
                 inMessage.fail(500, "Users Database error: " + response.cause().getMessage());
             }
         });
-    }
-
-    private void checkCredentials(Message<JsonObject> inMessage) {
-        log.info("Called method LOGIN with message body: " + inMessage.body());
-        log.warn("NOT SUPPORTED YET");
-        inMessage.fail(501, "Internal error: NOT SUPPORTED YET");
     }
 
     /**
