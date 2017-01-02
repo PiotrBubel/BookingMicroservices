@@ -179,16 +179,24 @@ public class RestApi extends AbstractVerticle {
                         respond(routingContext, cause.failureCode(), cause.getMessage());
                         return;
                     }
-                    JsonObject jsonObject;
+                    JsonObject resultBody;
                     if (response.result().body().getClass().equals(JsonObject.class)) {
-                        jsonObject = (JsonObject) response.result().body();
+                        resultBody = (JsonObject) response.result().body();
                     } else {
                         respond(routingContext, 500, "Internal server error. Server does not respond with application/json");
                         return;
                     }
+                    int code;
+                    String message;
+                    if (resultBody.containsKey("code")){
+                        routingContext.response().setStatusCode(resultBody.getInteger("code"));
+                    }
+                    if (resultBody.containsKey("message")){
+                        routingContext.response().setStatusMessage(resultBody.getString("message"));
+                    }
                     routingContext.response()
                             .putHeader("Content-Type", MediaType.JSON_UTF_8.toString())
-                            .end(jsonObject.encodePrettily());
+                            .end(resultBody.encodePrettily());
                 });
     }
 
