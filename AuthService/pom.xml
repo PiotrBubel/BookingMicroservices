@@ -8,13 +8,18 @@
     <name>AuthService</name>
 
     <properties>
-        <vertx-version>3.2.1</vertx-version>
+        <vertx-version>3.3.3</vertx-version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web</artifactId>
+            <version>${vertx-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-auth-mongo</artifactId>
             <version>${vertx-version}</version>
         </dependency>
         <dependency>
@@ -63,6 +68,12 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/javascript</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>

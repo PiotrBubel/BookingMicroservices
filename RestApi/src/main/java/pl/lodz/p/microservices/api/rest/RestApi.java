@@ -186,8 +186,6 @@ public class RestApi extends AbstractVerticle {
                         respond(routingContext, 500, "Internal server error. Server does not respond with application/json");
                         return;
                     }
-                    int code;
-                    String message;
                     if (resultBody.containsKey("code")){
                         routingContext.response().setStatusCode(resultBody.getInteger("code"));
                     }

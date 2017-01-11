@@ -41,12 +41,12 @@
 			"tests": "tests[\"Response time is less than 200ms\"] = responseTime < 200;\n\ntests[\"Status code is 200\"] = responseCode.code === 200;\n\ntests[\"Status code name has string OK\"] = responseCode.name.has(\"OK\");\n\ntests[\"Body contains list\"] = responseBody.has(\"list\");\n\nvar schema = {\n \"list\": {\n \"type\": \"array\"\n }\n};\nvar jsonData = JSON.parse(responseBody);\n\ntests[\"Valid Response\"] = tv4.validate(jsonData, schema);\n\ntests[\"Content-Type is present\"] = postman.getResponseHeader(\"Content-Type\");\n\nfunction contains(givenJsonArray)\n{\n    for( var i=0; i < givenJsonArray.length; i++ ){\n        if(givenJsonArray[i] === environment.testUserLogin){\n            return true;\n        }\n    }\n    return false;\n}\ntests[\"Response list does contains added user login\"] = contains(jsonData.list);\n\ntests[\"Content-Type is present\"] = postman.getResponseHeader(\"Content-Type\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1483391188108,
+			"time": 1483391922522,
 			"name": "GET users",
 			"description": "Request should return list of avaliable users.",
 			"collectionId": "42fe490a-b046-3015-5f12-32dbf2a16564",
 			"responses": [],
-			"rawModeData": "{\n  \"user\":{\n  \"password\": \"dupka\",\n  \"firstName\": true,\n  \"lastName\": true,\n  \"canManageServices\": true,\n  \"canManageUsers\": true\n}}"
+			"rawModeData": ""
 		},
 		{
 			"id": "3350144b-a928-4855-85e6-6891199b99e0",
@@ -116,7 +116,7 @@
 			"tests": "tests[\"Response time is less than 1000ms\"] = responseTime < 1000;\n\ntests[\"Status code is 500\"] = responseCode.code === 500;\n\nvar jsonData = JSON.parse(responseBody);\ntests[\"'duplicate' in response\"] = jsonData.message.has('duplicate');\n\ntests[\"Content-Type is present\"] = postman.getResponseHeader(\"Content-Type\");",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"time": 1483391188486,
+			"time": 1483391924207,
 			"name": "POST users duplicated login",
 			"description": "Endpoint used to create new user.",
 			"collectionId": "42fe490a-b046-3015-5f12-32dbf2a16564",
@@ -144,7 +144,7 @@
 		},
 		{
 			"id": "abaa8dbc-1cfb-9f0a-3c39-d0d472d377ee",
-			"headers": "//Content-Type: application/x-www-form-urlencoded\nAuthorization: Basic Og==\n",
+			"headers": "//Content-Type: application/x-www-form-urlencoded\n",
 			"url": "{{url}}/api/users",
 			"preRequestScript": null,
 			"pathVariables": {},
@@ -160,7 +160,7 @@
 			"description": "Request should return list of avaliable users.",
 			"collectionId": "42fe490a-b046-3015-5f12-32dbf2a16564",
 			"responses": [],
-			"rawModeData": "{\n  \"user\":{\n  \"password\": \"dupka\",\n  \"firstName\": true,\n  \"lastName\": true,\n  \"canManageServices\": true,\n  \"canManageUsers\": true\n}}"
+			"rawModeData": "{\n  \"user\":{\n  \"password\": \"aaa\",\n  \"firstName\": \"aaa\",\n  \"lastName\": \"aaa\",\n  \"canManageServices\": true,\n  \"canManageUsers\": true\n}}"
 		},
 		{
 			"id": "bb34c953-2605-bb0f-641d-4db6079508f6",
