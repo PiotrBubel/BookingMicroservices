@@ -43,15 +43,10 @@ public class AuthService extends AbstractVerticle {
             future.fail("Error when trying to create encrypter");
         }
         eventBus.consumer(AUTH_SERVICE_ADDRESS, this::messageHandler);
-        future.succeeded();
+        future.complete();
     }
 
     private void messageHandler(Message<JsonObject> inMessage) {
-        if (inMessage.body() == null) {
-            log.error("Empty message received.");
-            inMessage.fail(400, "Received method call without body");
-            return;
-        }
         String requestedMethod = inMessage.headers().get(METHOD_KEY);
 
         if (!EnumUtils.isValidEnum(Methods.class, requestedMethod)) {
@@ -60,6 +55,7 @@ public class AuthService extends AbstractVerticle {
             return;
         }
 
+        log.info("Received message. Method " + requestedMethod + " will be called.");
         switch (Methods.valueOf(requestedMethod)) {
             case LOGIN:
                 login(inMessage);
@@ -72,55 +68,49 @@ public class AuthService extends AbstractVerticle {
     }
 
     private void checkPermissions(Message<JsonObject> inMessage) {
-        log.info("Called method CHECK_PERMISSIONS with message body: " + inMessage.body());
-
+        String method = "";
         if (inMessage.body() == null) {
             log.error("Received CHECK_PERMISSIONS command without json object");
             inMessage.fail(400, "Received method call without JsonObject");
-            return;
-        } else if (!inMessage.body().containsKey("token") || StringUtils.isBlank(inMessage.body().getString("token"))) {
-            log.error("Received CHECK_PERMISSIONS command without token");
-            inMessage.fail(400, "Bad request. Field 'token' is required.");
             return;
         } else if (!inMessage.body().containsKey("method")) {
             log.error("Received CHECK_PERMISSIONS command without method");
             inMessage.fail(400, "Bad request. Field 'method' is required.");
             return;
-        } else if (!inMessage.body().containsKey("parameters")) {
-            log.error("Received CHECK_PERMISSIONS command without parameters");
-            inMessage.fail(400, "Bad request. Field 'parameters' is required.");
+        } else {
+            method = inMessage.body().getString("method");
+            if (!methodRequiresToken(method)) {
+                log.info("Requested action: " + method + " does not require token. Authorized.");
+                inMessage.reply(new JsonObject().put("code", 200).put("message", "Authorized"));
+                return;
+            }
+        }
+
+        if (!inMessage.body().containsKey("token") || StringUtils.isBlank(inMessage.body().getString("token"))) {
+            log.error("Received CHECK_PERMISSIONS command without token");
+            inMessage.fail(400, "Bad request. Field 'token' is required.");
             return;
         }
+
         JsonObject userData = new JsonObject();
         try {
             userData = getDataFromToken(inMessage.body().getString("token"));
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Exception when decrypting token: " + e.getMessage());
             inMessage.fail(401, "Wrong token");
         }
 
-//        JsonObject objectToSend = new JsonObject().put("login", userData.getString("login"));
-        // FIXME do we need to check database if we already have token?
-//        eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, objectToSend,
-//                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_USER_DETAILS"),
-//                (AsyncResult<Message<JsonObject>> response) -> {
-//                    if (response.succeeded()) {
-//
-//                        JsonObject result = response.result().body();
-                        boolean permissionGranted = check(userData,
-                                inMessage.body().getString("method"),
-                                inMessage.body().getJsonObject("parameters"));
+        boolean permissionGranted = check(userData,
+                method,
+                inMessage.body().getJsonObject("parameters"));
 
-                        if (permissionGranted) {
-                            inMessage.reply(new JsonObject().put("code", 200).put("message", "Authorized"));
-                        } else {
-                            inMessage.fail(401, "Unauthorized.");
-                        }
-//                    } else {
-//                        ReplyException cause = (ReplyException) response.cause();
-//                        inMessage.fail(cause.failureCode(), cause.getMessage());
-//                    }
-//                });
+        if (permissionGranted) {
+            log.info("User: " + userData.getString("login") + " is authorized to perform requested action: " + method);
+            inMessage.reply(new JsonObject().put("code", 200).put("message", "Authorized"));
+        } else {
+            log.info("User: " + userData.getString("login") + " is NOT authorized to perform requested action: " + method);
+            inMessage.fail(401, "Unauthorized.");
+        }
     }
 
     private boolean check(JsonObject userData, String method, JsonObject parameters) {
@@ -129,6 +119,7 @@ public class AuthService extends AbstractVerticle {
             // services
             case GET_SERVICES_LIST:
             case GET_SERVICE_DETAILS:
+            case GET_TAKEN_DATES:
                 return true;
 
             case DELETE_SERVICE:
@@ -136,24 +127,24 @@ public class AuthService extends AbstractVerticle {
             case EDIT_SERVICE:
                 return userData.getJsonObject("permissions").getBoolean("canManageServices");
 
-
             // bookings
             case SAVE_NEW_BOOKING:
                 return true;
 
             case DELETE_BOOKING:
             case EDIT_BOOKING:
-                return userData.getJsonObject("permissions").getBoolean("canManageServices");
+                return userData.getJsonObject("permissions").getBoolean("canManageBookings");
 
             case GET_BOOKINGS_LIST:
                 if (userData.getJsonObject("permissions").getBoolean("canManageBookings")) {
                     return true;
-                } else {
+                } else if (parameters != null && parameters.containsKey("login")) {
                     return userData.getString("login").equals(parameters.getString("login"));
+                } else {
+                    return false;
                 }
             case GET_BOOKING_DETAILS:
                 return true;
-
 
             // users
             case SAVE_NEW_USER:
@@ -167,8 +158,10 @@ public class AuthService extends AbstractVerticle {
             case GET_USER_DETAILS:
                 if (userData.getJsonObject("permissions").getBoolean("canManageUsers")) {
                     return true;
-                } else {
+                } else if (parameters != null && parameters.containsKey("login")) {
                     return userData.getString("login").equals(parameters.getString("login"));
+                } else {
+                    return false;
                 }
 
             default:
@@ -176,9 +169,22 @@ public class AuthService extends AbstractVerticle {
         }
     }
 
-    private void login(Message<JsonObject> inMessage) {
-        log.info("Called method LOGIN with message body: " + inMessage.body());
+    private boolean methodRequiresToken(String method) {
+        switch (ServicesMethods.valueOf(method)) {
+            // services
+            case GET_SERVICES_LIST:
+            case GET_SERVICE_DETAILS:
+                return false;
+            // users
+            case SAVE_NEW_USER:
+                return false;
 
+            default:
+                return true;
+        }
+    }
+
+    private void login(Message<JsonObject> inMessage) {
         if (inMessage.body() == null) {
             log.error("Received LOGIN command without json object");
             inMessage.fail(400, "Received method call without JsonObject");
@@ -196,14 +202,16 @@ public class AuthService extends AbstractVerticle {
         inMessage.body().remove("password");
 
         eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_USER_DETAILS"),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_USER_DETAILS_FROM_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         JsonObject result = response.result().body();
                         String password = result.getString("password");
                         if (password.equals(givenPassword)) {
+                            log.info("Correct credentials given by user: " + inMessage.body().getString("login") + " Generating and sending token.");
                             inMessage.reply(new JsonObject().put("token", createToken(result)));
                         } else {
+                            log.info("Wrong credentials given user: " + inMessage.body().getString("login") + " Unauthorized.");
                             inMessage.fail(401, "Unauthorized. Wrong credentials.");
                         }
                     } else {
@@ -224,7 +232,6 @@ public class AuthService extends AbstractVerticle {
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-        log.info("Create token: " + token);
         return token;
     }
 

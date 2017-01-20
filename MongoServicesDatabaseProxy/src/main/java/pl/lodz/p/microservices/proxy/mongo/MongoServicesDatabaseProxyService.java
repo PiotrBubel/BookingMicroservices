@@ -26,20 +26,17 @@ public class MongoServicesDatabaseProxyService extends AbstractVerticle {
     @Override
     public void start(Future<Void> fut) {
         config = Vertx.currentContext().config();
-
-        log.info("Attempting to start mongo cilent with following config: " + getMongoDBConfig().encodePrettily());
         mongoClient = MongoClient.createNonShared(vertx, getMongoDBConfig());
-
         EventBus eventBus = vertx.eventBus();
 
         eventBus.consumer(DATABASE_SERVICES_PROXY_SERVICE_ADDRESS, this::messageHandler);
 
         mongoClient.runCommand("ping", new JsonObject().put("ping", 1), mongoPingResponse -> {
             if (mongoPingResponse.succeeded()) {
-                log.info("Started Database Proxy Service with Mongo client");
+                log.info("Started Mongo Services Database Proxy Service with Mongo client");
                 fut.complete();
             } else {
-                log.error("Cannot create Database Services Proxy Service, cause: " + mongoPingResponse.cause().getMessage());
+                log.error("Cannot connect to database, cause: " + mongoPingResponse.cause().getMessage());
                 fut.fail(mongoPingResponse.cause().getMessage());
             }
         });
@@ -48,12 +45,6 @@ public class MongoServicesDatabaseProxyService extends AbstractVerticle {
     private void messageHandler(Message<JsonObject> inMessage) {
         String calledMethod = inMessage.headers().get(METHOD_KEY);
 
-        if (StringUtils.isBlank(calledMethod)) {
-            log.warn("Incoming message have no header with method");
-            inMessage.fail(400, "Message without method header");
-            return;
-        }
-
         if (!EnumUtils.isValidEnum(Methods.class, calledMethod)) {
             log.warn("Method +" + calledMethod + " not found");
             inMessage.fail(405, "Method not allowed");
@@ -61,22 +52,22 @@ public class MongoServicesDatabaseProxyService extends AbstractVerticle {
         }
 
         Methods method = Methods.valueOf(calledMethod);
-
+        log.info("Received message. Method " + method + " will be called.");
         switch (method) {
             // Services
-            case GET_SERVICES_LIST:
+            case GET_SERVICES_LIST_FROM_DATABASE:
                 ServiceDBManager.getServicesList(inMessage, mongoClient);
                 break;
-            case GET_SERVICE_DETAILS:
+            case GET_SERVICE_DETAILS_FROM_DATABASE:
                 ServiceDBManager.getServiceDetails(inMessage, mongoClient);
                 break;
-            case SAVE_NEW_SERVICE:
+            case SAVE_NEW_SERVICE_IN_DATABASE:
                 ServiceDBManager.saveNewService(inMessage, mongoClient);
                 break;
-            case DELETE_SERVICE:
+            case DELETE_SERVICE_FROM_DATABASE:
                 ServiceDBManager.deleteService(inMessage, mongoClient);
                 break;
-            case EDIT_SERVICE:
+            case EDIT_SERVICE_IN_DATABASE:
                 ServiceDBManager.editService(inMessage, mongoClient);
                 break;
         }
@@ -105,7 +96,7 @@ public class MongoServicesDatabaseProxyService extends AbstractVerticle {
 
         String username = config.getString("mongo_username");
         if (StringUtils.isBlank(username)) {
-            username = "BookingsServiceApp";
+            username = "ServicesDatabaseProxyUser";
         }
 
         String password = config.getString("mongo_password");

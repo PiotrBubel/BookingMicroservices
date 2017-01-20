@@ -6,6 +6,7 @@ public enum ServicesMethods {
     GET_SERVICES_LIST,
     GET_SERVICE_DETAILS,
     EDIT_SERVICE,
+    GET_TAKEN_DATES,
 
     DELETE_BOOKING,
     SAVE_NEW_BOOKING,

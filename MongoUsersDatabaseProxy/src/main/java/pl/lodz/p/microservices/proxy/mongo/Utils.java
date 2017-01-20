@@ -20,32 +20,4 @@ public class Utils {
                 .put("code", code)
                 .put("message", message);
     }
-
-    /**
-     * Method adds current date to given Json
-     *
-     * @return given JsonObject with added field with current date
-     */
-    public static JsonObject addCurrentDate(JsonObject json) {
-
-        return json.put("lotteryDate", Utils.currentDate());
-    }
-
-    /**
-     * @return formatted current date as String
-     */
-    public static String currentDate() {
-        Date d = new Date();
-        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return sdfDate.format(d);
-    }
-
-    /**
-     * @return formatted current date without hour, as String
-     */
-    public static String shortCurrentDate() {
-        Date d = new Date();
-        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
-        return sdfDate.format(d);
-    }
 }

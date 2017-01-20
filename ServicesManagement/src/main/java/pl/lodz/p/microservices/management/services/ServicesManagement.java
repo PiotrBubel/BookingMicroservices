@@ -33,19 +33,15 @@ public class ServicesManagement extends AbstractVerticle {
     }
 
     private void messageHandler(Message<JsonObject> inMessage) {
-        if (inMessage.body() == null) {
-            log.error("Empty message received.");
-            inMessage.fail(400, "Received method call without body");
-            return;
-        }
         String requestedMethod = inMessage.headers().get(METHOD_KEY);
 
         if (!EnumUtils.isValidEnum(Methods.class, requestedMethod)) {
-            log.error("Method not found");
-            inMessage.fail(500, "ServicesManagement: Method" + requestedMethod + " not found");
+            log.error("Method" + requestedMethod + " not found");
+            inMessage.fail(500, "Method" + requestedMethod + " not found");
             return;
         }
 
+        log.info("Received message. Method " + requestedMethod + " will be called.");
         switch (Methods.valueOf(requestedMethod)) {
             case DELETE_SERVICE:
                 deleteService(inMessage);
@@ -65,11 +61,9 @@ public class ServicesManagement extends AbstractVerticle {
         }
     }
 
-    // FIXME niepotrzebne?
     private void getServicesList(Message<JsonObject> inMessage) {
-        log.info("Called method GET_SERVICES_LIST");
         eventBus.send(DATABASE_SERVICES_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_SERVICES_LIST"),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_SERVICES_LIST_FROM_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         JsonObject replyList = new JsonObject().put("list", jsonObjectToArray(response.result().body()));
@@ -81,10 +75,7 @@ public class ServicesManagement extends AbstractVerticle {
                 });
     }
 
-    // FIXME niepotrzebne?
     private void getServiceDetails(Message<JsonObject> inMessage) {
-        log.info("Called method GET_SERVICE_DETAILS with message body: " + inMessage.body());
-
         if (inMessage.body() == null) {
             log.error("Received GET_SERVICE_DETAILS command without json object");
             inMessage.fail(400, "Received method call without JsonObject");
@@ -96,7 +87,7 @@ public class ServicesManagement extends AbstractVerticle {
         }
 
         eventBus.send(DATABASE_SERVICES_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_SERVICE_DETAILS"),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_AVAILABLE_DATES_FROM_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         inMessage.reply(response.result().body());
@@ -107,24 +98,26 @@ public class ServicesManagement extends AbstractVerticle {
                 });
     }
 
-    // FIXME niepotrzebne?
     private void saveNewService(Message<JsonObject> inMessage) {
-        log.info("Called method SAVE_NEW_SERVICE with message body: " + inMessage.body());
-
-        if (!inMessage.body().containsKey("service")) {
-            inMessage.fail(400, "Bad Request. Key 'service' is required.");
+        if (inMessage.body() == null) {
+            log.error("Received SAVE_NEW_SERVICE command without json object");
+            inMessage.fail(400, "Received method call without JsonObject");
+            return;
+        } else if (!inMessage.body().containsKey("service")) {
+            inMessage.fail(400, "Bad Request. Field 'service' is required.");
             return;
         }
         JsonObject newService = inMessage.body().getJsonObject("service");
-
         if (!newService.containsKey("name") || !newService.containsKey("price") ||
                 StringUtils.isBlank(newService.getString("name"))) {
+            log.error("Received SAVE_NEW_SERVICE command without service name or price");
             inMessage.fail(400, "Bad Request. Fields 'name' and 'price' are required.");
             return;
         }
 
+        Utils.addCreatedDate(newService);
         eventBus.send(DATABASE_SERVICES_PROXY_SERVICE_ADDRESS, newService,
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "SAVE_NEW_SERVICE"),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "SAVE_NEW_SERVICE_IN_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         inMessage.reply(response.result().body());
@@ -135,21 +128,23 @@ public class ServicesManagement extends AbstractVerticle {
                 });
     }
 
-    // FIXME niepotrzebne?
     private void editService(Message<JsonObject> inMessage) {
-        log.info("Called method EDIT_SERVICE with message body: " + inMessage.body());
-
-        if (!inMessage.body().containsKey("service")) {
+        if (inMessage.body() == null) {
+            log.error("Received EDIT_SERVICE command without json object");
+            inMessage.fail(400, "Received method call without JsonObject");
+            return;
+        } else if (!inMessage.body().containsKey("service")) {
+            log.error("Received EDIT_SERVICE command without service data");
             inMessage.fail(400, "Bad Request. Service data is required.");
             return;
-        }
-        if (!inMessage.body().containsKey("name")) {
+        } else if (!inMessage.body().containsKey("name")) {
+            log.error("Received EDIT_SERVICE command without service name");
             inMessage.fail(400, "Bad Request. Service name is required.");
             return;
         }
 
         eventBus.send(DATABASE_SERVICES_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "EDIT_SERVICE"),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "EDIT_SERVICE_IN_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         inMessage.reply(response.result().body());
@@ -160,11 +155,19 @@ public class ServicesManagement extends AbstractVerticle {
                 });
     }
 
-    // FIXME niepotrzebne?
     private void deleteService(Message<JsonObject> inMessage) {
-        log.info("Called method DELETE_SERVICE with message body: " + inMessage.body());
+        if (inMessage.body() == null) {
+            log.error("Received DELETE_SERVICE command without json object");
+            inMessage.fail(400, "Received method call without JsonObject");
+            return;
+        } else if (!inMessage.body().containsKey("name")) {
+            log.error("Received DELETE_SERVICE command without service name");
+            inMessage.fail(400, "Bad Request. Service name is required.");
+            return;
+        }
+
         eventBus.send(DATABASE_SERVICES_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "DELETE_SERVICE"),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "DELETE_SERVICE_FROM_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         inMessage.reply(response.result().body());

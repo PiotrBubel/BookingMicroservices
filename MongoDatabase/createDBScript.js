@@ -15,15 +15,11 @@ db.createCollection("Services", {
                 $type: "int",
                 $exists: true
             },
-            timePeriod: {
-                $type: "int",
-                $exists: true
-            },
-            maxPeriods: {
-                $type: "int",
-                $exists: true
-            },
             description: {
+                $type: "string",
+                $exists: true
+            },
+            createdDate: {
                 $type: "string",
                 $exists: true
             }
@@ -49,15 +45,15 @@ db.createCollection("Bookings", {
                 $type: "string",
                 $exists: true
             },
-            startDate: {
+            date: {
                 $type: "string",
                 $exists: true
             },
-            periods: {
-                $type: "int",
+            description: {
+                $type: "string",
                 $exists: true
             },
-            description: {
+            createdDate: {
                 $type: "string",
                 $exists: true
             }
@@ -67,93 +63,107 @@ db.createCollection("Bookings", {
 });
 
 db.Bookings.createIndex(
-    {userLogin: 1}
+    {
+        userLogin: 1,
+        serviceName: 1,
+        date: 1
+    },
+    {unique: true}
 );
 print('* Created collection Bookings. All collections: ' + db.getCollectionNames());
 
-db.dropRole("BookingsServiceAppRole");
+db.dropRole("ServicesDatabaseProxyRole");
 db.createRole({
-    role: "BookingsServiceAppRole",
+    role: "ServicesDatabaseProxyRole",
+    privileges: [{
+        resource: {
+            db: "BookingsServiceDB",
+            collection: "Services"
+        },
+        actions: [ "find", "update", "insert", "remove" ]
+    }],
+    roles: []
+});
+print('* Created role ServicesDatabaseProxyRole');
+
+db.dropUser("ServicesDatabaseProxyUser");
+db.createUser({
+    user: "ServicesDatabaseProxyUser",
+    pwd: "BookingsServicep@Ssw0rd",
+    roles: [{
+        role: "ServicesDatabaseProxyRole",
+        db: "BookingsServiceDB"
+    }]
+});
+print('* Created user ServicesDatabaseProxyUser');
+
+db.dropRole("BookingsDatabaseProxyRole");
+db.createRole({
+    role: "BookingsDatabaseProxyRole",
     privileges: [{
         resource: {
             db: "BookingsServiceDB",
             collection: "Bookings"
         },
-        actions: ["find", "insert"]
-    }, {
-        resource: {
-            db: "BookingsServiceDB",
-            collection: "Services"
-        },
-        actions: ["find", "insert"]
-    }, {
-        resource: {
-            db: "BookingsServiceDB",
-            collection: "Settings"
-        },
-        actions: ["find", "insert"]
+        actions: [ "find", "update", "insert", "remove" ]
     }],
     roles: []
 });
-print('* Created role BookingsServiceAppRole');
+print('* Created role BookingsServiceAppUser');
 
-db.dropUser("BookingsServiceApp");
+db.dropUser("BookingsDatabaseProxyUser");
 db.createUser({
-    user: "BookingsServiceApp",
+    user: "BookingsDatabaseProxyUser",
     pwd: "BookingsServicep@Ssw0rd",
     roles: [{
-        role: "BookingsServiceAppRole",
+        role: "BookingsDatabaseProxyRole",
         db: "BookingsServiceDB"
     }]
 });
-print('* Created user BookingsServiceApp, pwd: BookingsServicep@Ssw0rd');
+print('* Created user BookingsDatabaseProxyUser');
 
 db.Services.insert({
     name: "usluga1",
-    timePeriod: NumberInt(60),
-    maxPeriods: NumberInt(2),
     price: NumberInt(15),
+    createdDate: "2017-01-02",
     description: "opis uslugi 1"
 });
 
 db.Services.insert({
     name: "usluga2",
-    timePeriod: NumberInt(30),
-    maxPeriods: NumberInt(4),
     price: NumberInt(15),
+    createdDate: "2017-01-02",
     description: "opis uslugi 2"
 });
 
 db.Services.insert({
     name: "usluga3",
-    timePeriod: NumberInt(15),
-    maxPeriods: NumberInt(6),
     price: NumberInt(30),
+    createdDate: "2017-01-02",
     description: "opis uslugi 3"
 });
 
 db.Services.insert({
     name: "usluga4",
-    timePeriod: NumberInt(15),
-    maxPeriods: NumberInt(4),
     price: NumberInt(60),
+    createdDate: "2017-01-02",
     description: "opis uslugi 4"
 });
 
 db.Bookings.insert({
     serviceName: "usluga4",
     userLogin: "pbubel",
-    startDate: "2017-01-02;10:00",
-    periods: NumberInt(3),
-    description: "opis uslugi 4"
+    date: "2017-01-02",
+    createdDate: "2017-01-02",
+    description: "opis rezerwacji 1"
 });
 
 db.Bookings.insert({
     serviceName: "usluga4",
     userLogin: "pbubel",
-    startDate: "2017-01-02;13:00",
-    periods: NumberInt(3),
-    description: "opis uslugi 4"
+    date: "2017-01-02",
+    createdDate: "2017-01-02",
+    description: "opis rezerwacji 2"
 });
 
 print('* Inserted services into db');

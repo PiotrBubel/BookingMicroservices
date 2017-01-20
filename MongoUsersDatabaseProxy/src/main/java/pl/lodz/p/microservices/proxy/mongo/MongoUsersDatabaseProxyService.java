@@ -29,10 +29,7 @@ public class MongoUsersDatabaseProxyService extends AbstractVerticle {
     @Override
     public void start(Future<Void> fut) {
         config = Vertx.currentContext().config();
-
-        log.info("Attempting to start mongo cilent with following config: " + getMongoDBConfig().encodePrettily());
         mongoClient = MongoClient.createNonShared(vertx, getMongoDBConfig());
-
         EventBus eventBus = vertx.eventBus();
 
         eventBus.consumer(DATABASE_USERS_PROXY_SERVICE_ADDRESS, this::messageHandler);
@@ -42,7 +39,7 @@ public class MongoUsersDatabaseProxyService extends AbstractVerticle {
                 log.info("Started Mongo Users Database Proxy Service with Mongo client");
                 fut.complete();
             } else {
-                log.error("Cannot create Mongo Users Database Proxy Service, cause: " + mongoPingResponse.cause().getMessage());
+                log.error("Cannot connect to database, cause: " + mongoPingResponse.cause().getMessage());
                 fut.fail(mongoPingResponse.cause().getMessage());
             }
         });
@@ -51,12 +48,6 @@ public class MongoUsersDatabaseProxyService extends AbstractVerticle {
     private void messageHandler(Message<JsonObject> inMessage) {
         String calledMethod = inMessage.headers().get(METHOD_KEY);
 
-        if (StringUtils.isBlank(calledMethod)) {
-            log.warn("Incoming message have no header with method");
-            inMessage.fail(400, "Message without method header");
-            return;
-        }
-
         if (!EnumUtils.isValidEnum(Methods.class, calledMethod)) {
             log.warn("Method +" + calledMethod + " not found");
             inMessage.fail(405, "Method not allowed");
@@ -64,29 +55,27 @@ public class MongoUsersDatabaseProxyService extends AbstractVerticle {
         }
 
         Methods method = Methods.valueOf(calledMethod);
-
+        log.info("Received message. Method " + method + " will be called.");
         switch (method) {
-            case GET_USERS_LIST:
+            case GET_USERS_LIST_FROM_DATABASE:
                 getUsersList(inMessage);
                 break;
-            case GET_USER_DETAILS:
+            case GET_USER_DETAILS_FROM_DATABASE:
                 getUserDetails(inMessage);
                 break;
-            case SAVE_NEW_USER:
+            case SAVE_NEW_USER_IN_DATABASE:
                 saveNewUser(inMessage);
                 break;
-            case DELETE_USER:
+            case DELETE_USER_FROM_DATABASE:
                 deleteUser(inMessage);
                 break;
-            case EDIT_USER:
+            case EDIT_USER_IN_DATABASE:
                 editUser(inMessage);
                 break;
         }
     }
 
     private void getUsersList(Message<JsonObject> inMessage) {
-        log.info("Called method GET_USERS_LIST");
-
         FindOptions options = new FindOptions().setFields(new JsonObject().put("_id", 0)
                 .put("time", 0).put("description", 0));
 
@@ -94,26 +83,15 @@ public class MongoUsersDatabaseProxyService extends AbstractVerticle {
             if (response.succeeded()) {
                 JsonObject result = new JsonObject().put("list", response.result());
                 inMessage.reply(result);
-                log.info("Load users from database succeeded. " + result);
+                log.info("Load users list from database succeeded.");
             } else {
-                log.error("Load users from database failed, cause: " + response.cause().getMessage());
+                log.error("Load users list from database failed, cause: " + response.cause().getMessage());
                 inMessage.fail(500, "Users Database error: " + response.cause().getMessage());
             }
         });
     }
 
     private void getUserDetails(Message<JsonObject> inMessage) {
-        log.info("Called method GET_USER_DETAILS");
-
-        if (inMessage.body() == null) {
-            log.error("Received GET_USER_DETAILS command without json object");
-            inMessage.fail(400, "Received method call without JsonObject");
-            return;
-        } else if (!inMessage.body().containsKey("login")) {
-            log.error("Received GET_USER_DETAILS command without user login");
-            inMessage.fail(400, "Received method call without valid JsonObject");
-            return;
-        }
         String login = inMessage.body().getString("login");
         FindOptions options = new FindOptions().setFields(new JsonObject().put("_id", 0));
         JsonObject jsonQuery = new JsonObject().put("login", login);
@@ -123,9 +101,9 @@ public class MongoUsersDatabaseProxyService extends AbstractVerticle {
                 if (response.result().size() > 0) {
                     JsonObject result = response.result().get(0);
                     inMessage.reply(result);
-                    log.info("Load user details from database succeeded. " + result);
+                    log.info("Load user details from database succeeded.");
                 } else {
-                    log.info("Load user details from database not succeeded. No user with login: " + login);
+                    log.error("Load user details from database not succeeded. No user with login: " + login);
                     inMessage.fail(404, "No user with login: " + login);
                 }
             } else {
@@ -136,46 +114,27 @@ public class MongoUsersDatabaseProxyService extends AbstractVerticle {
     }
 
     private void editUser(Message<JsonObject> inMessage) {
-        log.info("Called method EDIT_USER");
-
-        if (inMessage.body() == null) {
-            log.error("Received EDIT_USER command without json object");
-            inMessage.fail(400, "Received method call without JsonObject");
-            return;
-        } else if (!inMessage.body().containsKey("login")) {
-            log.error("Received EDIT_USER command without service login");
-            inMessage.fail(400, "Received method call without valid JsonObject");
-            return;
-        }
         String login = inMessage.body().getString("login");
         JsonObject jsonQuery = new JsonObject().put("login", login);
-        JsonObject serviceData = inMessage.body().getJsonObject("user");
-        JsonObject update = new JsonObject().put("$set", serviceData);
+        JsonObject userData = inMessage.body().getJsonObject("user");
+        JsonObject update = new JsonObject().put("$set", userData);
 
         mongoClient.update(COLLECTION_USERS, jsonQuery, update, response -> {
             if (response.succeeded()) {
-                log.info("Save new user data to database succeeded. Edited user: " + login + " new data: " + serviceData.encode());
+                log.info("Edit user data in database succeeded.");
                 inMessage.reply(Utils.jsonHttpResponse(200, "Edited"));
             } else {
-                log.info("Save new user data to database failed, cause: " + response.cause().getMessage());
+                log.error("Edit user data in database failed, cause: " + response.cause().getMessage());
                 inMessage.fail(500, "Users Database error: " + response.cause().getMessage());
             }
         });
     }
 
     private void saveNewUser(Message<JsonObject> inMessage) {
-        log.info("Called method SAVE_NEW_USER with message body: " + inMessage.body());
-
-        if (inMessage.body() == null) {
-            log.error("Received SAVE_NEW_USER command without json object");
-            inMessage.fail(400, "Received method call without JsonObject");
-            return;
-        }
-
         JsonObject userJsonObject = inMessage.body();
         mongoClient.insert(COLLECTION_USERS, userJsonObject, response -> {
             if (response.succeeded()) {
-                log.info("Save new user to database succeeded. New user: " + userJsonObject.encodePrettily());
+                log.info("Save new user to database succeeded.");
                 inMessage.reply(Utils.jsonHttpResponse(201, "Created"));
             } else {
                 log.error("Save new user to database failed, cause: " + response.cause().getMessage());
@@ -185,18 +144,6 @@ public class MongoUsersDatabaseProxyService extends AbstractVerticle {
     }
 
     private void deleteUser(Message<JsonObject> inMessage) {
-        log.info("Called method DELETE_USER with message body: " + inMessage.body());
-
-        if (inMessage.body() == null) {
-            log.error("Received DELETE_USER command without json object");
-            inMessage.fail(400, "Received method call without JsonObject");
-            return;
-        } else if (!inMessage.body().containsKey("login")) {
-            log.error("Received DELETE_SERVICE command without service login");
-            inMessage.fail(400, "Received method call without valid JsonObject");
-            return;
-        }
-
         JsonObject jsonQuery = new JsonObject().put("login", inMessage.body().getValue("login"));
         mongoClient.removeOne(COLLECTION_USERS, jsonQuery, response -> {
             if (response.succeeded()) {
