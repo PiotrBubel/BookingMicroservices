@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 public class BookingManagement extends AbstractVerticle {
 
     private static final String BOOKINGS_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.booking.BookingManagement";
-    private static final String DATABASE_PROXY_SERVICE_ADDRESS = "pl.lodz.p.microservices.proxy.mongo.DatabaseProxyService";
+    private static final String DATABASE_BOOKING_PROXY_SERVICE_ADDRESS = "pl.lodz.p.microservices.proxy.mongo.DatabaseBookingProxyService";
 
     private static final String METHOD_KEY = "method";
     private static final int TIMEOUT = 4000;
@@ -68,7 +68,7 @@ public class BookingManagement extends AbstractVerticle {
     // FIXME niepotrzebne?
     private void getBookingsList(Message<JsonObject> inMessage) {
         log.info("Called method GET_BOOKINGS_LIST");
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
+        eventBus.send(DATABASE_BOOKING_PROXY_SERVICE_ADDRESS, inMessage.body(),
                 new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_BOOKINGS_LIST"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
@@ -96,7 +96,7 @@ public class BookingManagement extends AbstractVerticle {
         }
         JsonObject query = new JsonObject().put("_id", inMessage.body().getString("id"));
 
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, query,
+        eventBus.send(DATABASE_BOOKING_PROXY_SERVICE_ADDRESS, query,
                 new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_BOOKING_DETAILS"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
@@ -130,7 +130,7 @@ public class BookingManagement extends AbstractVerticle {
             return;
         }
 
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, newBooking,
+        eventBus.send(DATABASE_BOOKING_PROXY_SERVICE_ADDRESS, newBooking,
                 new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "SAVE_NEW_BOOKING"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
@@ -157,7 +157,7 @@ public class BookingManagement extends AbstractVerticle {
         JsonObject query = new JsonObject().put("booking", inMessage.body().getJsonObject("booking"))
                 .put("_id", inMessage.body().getString("id"));
 
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, query,
+        eventBus.send(DATABASE_BOOKING_PROXY_SERVICE_ADDRESS, query,
                 new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "EDIT_BOOKING"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
@@ -178,7 +178,7 @@ public class BookingManagement extends AbstractVerticle {
             return;
         }
         JsonObject query = new JsonObject().put("_id", inMessage.body().getString("id"));
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, query,
+        eventBus.send(DATABASE_BOOKING_PROXY_SERVICE_ADDRESS, query,
                 new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "DELETE_BOOKING"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {

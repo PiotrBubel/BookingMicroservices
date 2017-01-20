@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>pl.lodz.p.microservices</groupId>
-    <artifactId>MongoDatabaseProxy</artifactId>
+    <artifactId>MongoServicesDatabaseProxy</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>MongoDatabaseProxyService</name>
+    <name>MongoServicesDatabaseProxyService</name>
 
     <properties>
         <vertx-version>3.3.3</vertx-version>
@@ -82,7 +82,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Main-Class>io.vertx.core.Launcher</Main-Class>
-                                        <Main-Verticle>pl.lodz.p.microservices.proxy.mongo.MongoDatabaseProxyService
+                                        <Main-Verticle>pl.lodz.p.microservices.proxy.mongo.MongoServicesDatabaseProxyService
                                         </Main-Verticle>
                                     </manifestEntries>
                                 </transformer>

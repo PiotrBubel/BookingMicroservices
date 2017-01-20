@@ -7,8 +7,14 @@ services:
      - /data/db/bookings:/data/db
     restart: always
 
-  mongodatabaseproxy:
-    image: microservices/mongodatabaseproxy:latest
+  mongobookingdatabaseproxy:
+    image: microservices/mongobookingdatabaseproxy:latest
+    links:
+      - mongodatabase
+    restart: always
+
+  mongoservicesdatabaseproxy:
+    image: microservices/mongoservicesdatabaseproxy:latest
     links:
       - mongodatabase
     restart: always

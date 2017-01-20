@@ -15,6 +15,7 @@ myApp.controller("loginController", function ($scope, $timeout, usersFactory, lo
     };
 
     $scope.loginData = {};
+    $scope.loginPattern = '[a-zA-Z]+';
 
     var messageHandler = {};
     messageHandler.showErrorMessage = function (message, description) {
@@ -37,31 +38,47 @@ myApp.controller("loginController", function ($scope, $timeout, usersFactory, lo
 
     $scope.saveNewUser = function () {
         usersFactory.create($scope.userData)
-            .success(function () {
-                $scope.login($scope.userData.login, $scope.userData.password);
-            })
-            .error(function (error) {
-                if (error) {
-                    messageHandler.showErrorMessage('Błąd ', error.message);
-                } else {
-                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
-                }
-            });
+            .then(
+                function () {
+                    $scope.login($scope.userData.login, $scope.userData.password);
+                },
+                function (error) {
+                    if (error.data) {
+                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                    } else {
+                        messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                    }
+                });
     };
 
     $scope.login = function (login, password) {
         loginFactory.login(login, password)
-            .success(function (result) {
-                $cookies.putObject('user', result);
-                $rootScope.globalUser = result;
-                $location.path('/account');
-            })
-            .error(function (error) {
-                if (error) {
-                    messageHandler.showErrorMessage('Błąd ', error.message);
-                } else {
-                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
-                }
-            });
+            .then(
+                function (result) {
+                    $cookies.putObject('token', result.data.token);
+                    $rootScope.token = result.data.token;
+                    usersFactory.getDetails(login)
+                        .then(
+                            function (result2) {
+                                $cookies.putObject('user', result2.data);
+                                $rootScope.globalUser = result2.data;
+                                $location.path('/account');
+                            },
+                            function (error) {
+                                if (error.data) {
+                                    messageHandler.showErrorMessage('Błąd ', error.data.message);
+                                } else {
+                                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                                }
+                            }
+                        );
+                },
+                function (error) {
+                    if (error.data) {
+                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                    } else {
+                        messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                    }
+                });
     };
 });

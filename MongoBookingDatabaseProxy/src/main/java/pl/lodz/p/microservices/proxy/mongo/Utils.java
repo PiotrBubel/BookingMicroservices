@@ -28,7 +28,7 @@ public class Utils {
      */
     public static JsonObject addCurrentDate(JsonObject json) {
 
-        return json.put("lotteryDate", Utils.currentDate());
+        return json.put("date", Utils.currentDate());
     }
 
     /**

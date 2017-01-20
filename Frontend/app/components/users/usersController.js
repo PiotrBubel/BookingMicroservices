@@ -2,7 +2,7 @@
 
 myApp.controller("usersController", function ($scope, $timeout, usersFactory, $rootScope) {
 
-    $scope.canManageUsers =  $rootScope.globalUser && $rootScope.globalUser.permissions && $rootScope.globalUser.permissions.canManageUsers;
+    $scope.canManageUsers = $rootScope.globalUser && $rootScope.globalUser.permissions && $rootScope.globalUser.permissions.canManageUsers;
 
     $scope.createNew = true;
     $scope.userData = {
@@ -12,6 +12,7 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory, $r
             canManageBookings: false
         }
     };
+    $scope.users = [];
 
     var clearData = angular.copy($scope.userData);
 
@@ -54,32 +55,34 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory, $r
 
     var refreshList = function () {
         usersFactory.getList()
-            .success(function (response) {
-                $scope.users = response.list;
-            })
-            .error(function (error) {
-                if (error) {
-                    messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
-                } else {
-                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
-                }
-            });
+            .then(
+                function (response) {
+                    $scope.users = response.data.list;
+                },
+                function (error) {
+                    if (error.data) {
+                        messageHandler.showErrorMessage('Błąd pobierania danych ', error.data.message);
+                    } else {
+                        messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                    }
+                });
     };
     refreshList();
 
     $scope.changeSelected = function (login) {
         usersFactory.getDetails(login)
-            .success(function (response) {
-                $scope.userData = response;
-                $scope.createNew = false;
-            })
-            .error(function (error) {
-                if (error) {
-                    messageHandler.showErrorMessage('Błąd pobierania danych', error.message);
-                } else {
-                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
-                }
-            });
+            .then(
+                function (response) {
+                    $scope.userData = response.data;
+                    $scope.createNew = false;
+                },
+                function (error) {
+                    if (error.data) {
+                        messageHandler.showErrorMessage('Błąd pobierania danych', error.data.message);
+                    } else {
+                        messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                    }
+                });
     };
 
     $scope.setNew = function () {
@@ -94,53 +97,56 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory, $r
 
     $scope.saveNewUser = function () {
         usersFactory.create($scope.userData)
-            .success(function () {
-                messageHandler.showSuccessMessage('Dodano pomyślnie');
-                $scope.changeSelected($scope.userData.login);
-                $scope.createNew = false;
-                refreshList();
-            })
-            .error(function (error) {
-                if (error) {
-                    messageHandler.showErrorMessage('Błąd ', error.message);
-                } else {
-                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
-                }
-            });
+            .then(
+                function () {
+                    messageHandler.showSuccessMessage('Dodano pomyślnie');
+                    $scope.changeSelected($scope.userData.login);
+                    $scope.createNew = false;
+                    refreshList();
+                },
+                function (error) {
+                    if (error.data) {
+                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                    } else {
+                        messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                    }
+                });
     };
 
     $scope.removeUser = function () {
         usersFactory.remove($scope.userData.login)
-            .success(function () {
-                messageHandler.showSuccessMessage('Usunięto pomyślnie');
-                refreshList();
-                $scope.setNew();
-            })
-            .error(function (error) {
-                if (error) {
-                    messageHandler.showErrorMessage('Błąd ', error.message);
-                } else {
-                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
-                }
-            });
+            .then(
+                function () {
+                    messageHandler.showSuccessMessage('Usunięto pomyślnie');
+                    refreshList();
+                    $scope.setNew();
+                },
+                function (error) {
+                    if (error.data) {
+                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                    } else {
+                        messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                    }
+                });
     };
 
     $scope.editUser = function () {
         var newData = angular.copy($scope.userData);
         delete(newData.login);
         usersFactory.edit($scope.userData.login, newData)
-            .success(function () {
-                messageHandler.showSuccessMessage('Edytowano pomyślnie');
-                refreshList();
-                $scope.changeSelected($scope.userData.login);
-            })
-            .error(function (error) {
-                if (error) {
-                    messageHandler.showErrorMessage('Błąd ', error.message);
-                } else {
-                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
-                }
-            });
+            .then(
+                function () {
+                    messageHandler.showSuccessMessage('Edytowano pomyślnie');
+                    refreshList();
+                    $scope.changeSelected($scope.userData.login);
+                },
+                function (error) {
+                    if (error.data) {
+                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                    } else {
+                        messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                    }
+                });
     };
 
     $scope.exists = function (givenObject) {

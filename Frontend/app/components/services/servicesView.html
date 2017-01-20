@@ -8,8 +8,9 @@
                     {{ name }}
                 </a>
             </div>
-            <a ng-if="canManageServices" class="list-group-item list-group-item-success" ng-click="setNew()">-- nowa
-                --</a>
+            <a ng-if="canManageServices" class="list-group-item list-group-item-success" ng-click="setNew()">
+                -- nowa --
+            </a>
         </div>
     </div>
 
@@ -82,7 +83,7 @@
                         Usługa całodobowa:
                     </div>
                     <div class="col-md-1 form-group">
-                        <input type="checkbox" name="wholeDay"
+                        <input type="checkbox" name="wholeDay" disabled
                                ng-model="helper.wholeDay" ng-change="changeWholeDay(helper.wholeDay)">
                     </div>
                 </div>

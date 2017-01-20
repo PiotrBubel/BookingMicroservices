@@ -1,24 +1,18 @@
 package pl.lodz.p.microservices.proxy.mongo;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.EnumUtils;
 
 /**
  * Created by pbubel on 01.01.17.
  */
 class ServiceDBManager {
     private static final String COLLECTION_SERVICES = "Services";
-    private static final Logger log = LoggerFactory.getLogger(pl.lodz.p.microservices.proxy.mongo.MongoDatabaseProxyService.class);
+    private static final Logger log = LoggerFactory.getLogger(MongoServicesDatabaseProxyService.class);
 
     static void getServicesList(Message<JsonObject> inMessage, MongoClient mongoClient) {
         log.info("Called method GET_SERVICES_LIST");

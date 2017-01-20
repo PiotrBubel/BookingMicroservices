@@ -11,18 +11,17 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
 
-public class MongoDatabaseProxyService extends AbstractVerticle {
+public class MongoBookingDatabaseProxyService extends AbstractVerticle {
 
-    private static final String DATABASE_PROXY_SERVICE_ADDRESS = "pl.lodz.p.microservices.proxy.mongo.DatabaseProxyService";
+    private static final String DATABASE_BOOKING_PROXY_SERVICE_ADDRESS = "pl.lodz.p.microservices.proxy.mongo.DatabaseBookingProxyService";
     private static final String METHOD_KEY = "method";
 
     private static MongoClient mongoClient;
     private static JsonObject config;
 
-    private static final Logger log = LoggerFactory.getLogger(MongoDatabaseProxyService.class);
+    private static final Logger log = LoggerFactory.getLogger(MongoBookingDatabaseProxyService.class);
 
     @Override
     public void start(Future<Void> fut) {
@@ -33,7 +32,7 @@ public class MongoDatabaseProxyService extends AbstractVerticle {
 
         EventBus eventBus = vertx.eventBus();
 
-        eventBus.consumer(DATABASE_PROXY_SERVICE_ADDRESS, this::messageHandler);
+        eventBus.consumer(DATABASE_BOOKING_PROXY_SERVICE_ADDRESS, this::messageHandler);
 
         mongoClient.runCommand("ping", new JsonObject().put("ping", 1), mongoPingResponse -> {
             if (mongoPingResponse.succeeded()) {
@@ -64,23 +63,6 @@ public class MongoDatabaseProxyService extends AbstractVerticle {
         Methods method = Methods.valueOf(calledMethod);
 
         switch (method) {
-            // Services
-            case GET_SERVICES_LIST:
-                ServiceDBManager.getServicesList(inMessage, mongoClient);
-                break;
-            case GET_SERVICE_DETAILS:
-                ServiceDBManager.getServiceDetails(inMessage, mongoClient);
-                break;
-            case SAVE_NEW_SERVICE:
-                ServiceDBManager.saveNewService(inMessage, mongoClient);
-                break;
-            case DELETE_SERVICE:
-                ServiceDBManager.deleteService(inMessage, mongoClient);
-                break;
-            case EDIT_SERVICE:
-                ServiceDBManager.editService(inMessage, mongoClient);
-                break;
-
             // Bookings
             case SAVE_NEW_BOOKING:
                 BookingDBManager.saveNewBooking(inMessage, mongoClient);

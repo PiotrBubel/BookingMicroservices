@@ -5,6 +5,7 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
     $scope.canManageServices = $rootScope.globalUser && $rootScope.globalUser.permissions && $rootScope.globalUser.permissions.canManageServices;
 
     $scope.createNew = true;
+    $scope.services = [];
     $scope.serviceData = {
         description: '',
         price: 1,
@@ -12,7 +13,7 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
         maxPeriods: 2
     };
     $scope.helper = {
-        wholeDay: false
+        wholeDay: true
     };
 
     var clearData = angular.copy($scope.serviceData);
@@ -57,37 +58,39 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
 
     var refreshList = function () {
         servicesFactory.getList()
-            .success(function (response) {
-                $scope.services = response.list;
-                if (!$scope.canManageServices) {
-                    $scope.changeSelected($scope.services[0]);
-                }
-            })
-            .error(function (error) {
-                if (error) {
-                    messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
-                } else {
-                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
-                }
-            });
+            .then(
+                function (response) {
+                    $scope.services = response.data.list;
+                    if (!$scope.canManageServices) {
+                        $scope.changeSelected($scope.services[0]);
+                    }
+                },
+                function (error) {
+                    if (error.data) {
+                        messageHandler.showErrorMessage('Błąd pobierania danych ', error.data.message);
+                    } else {
+                        messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                    }
+                });
     };
     refreshList();
 
     $scope.changeSelected = function (name) {
         servicesFactory.getDetails(name)
-            .success(function (response) {
-                $scope.serviceData = response;
-                rawData = response;
-                $scope.helper.wholeDay = ($scope.serviceData.maxPeriods * $scope.serviceData.timePeriod === 60 * 24);
-                $scope.createNew = false;
-            })
-            .error(function (error) {
-                if (error) {
-                    messageHandler.showErrorMessage('Błąd pobierania danych ', error.message);
-                } else {
-                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
-                }
-            });
+            .then(
+                function (response) {
+                    $scope.serviceData = response.data;
+                    rawData = response.data;
+                    $scope.helper.wholeDay = ($scope.serviceData.maxPeriods * $scope.serviceData.timePeriod === 60 * 24);
+                    $scope.createNew = false;
+                },
+                function (error) {
+                    if (error.data) {
+                        messageHandler.showErrorMessage('Błąd pobierania danych ', error.data.message);
+                    } else {
+                        messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                    }
+                });
     };
 
     $scope.setNew = function () {
@@ -98,53 +101,56 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
 
     $scope.saveNewService = function () {
         servicesFactory.create($scope.serviceData)
-            .success(function () {
-                messageHandler.showSuccessMessage('Dodano pomyślnie');
-                $scope.changeSelected($scope.serviceData.name);
-                $scope.createNew = false;
-                refreshList();
-            })
-            .error(function (error) {
-                if (error) {
-                    messageHandler.showErrorMessage('Błąd ', error.message);
-                } else {
-                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
-                }
-            });
+            .then(
+                function () {
+                    messageHandler.showSuccessMessage('Dodano pomyślnie');
+                    $scope.changeSelected($scope.serviceData.name);
+                    $scope.createNew = false;
+                    refreshList();
+                },
+                function (error) {
+                    if (error.data) {
+                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                    } else {
+                        messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                    }
+                });
     };
 
     $scope.removeService = function () {
         servicesFactory.remove($scope.serviceData.name)
-            .success(function () {
-                messageHandler.showSuccessMessage('Usunięto pomyślnie');
-                refreshList();
-                $scope.setNew();
-            })
-            .error(function (error) {
-                if (error) {
-                    messageHandler.showErrorMessage('Błąd ', error.message);
-                } else {
-                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
-                }
-            });
+            .then(
+                function () {
+                    messageHandler.showSuccessMessage('Usunięto pomyślnie');
+                    refreshList();
+                    $scope.setNew();
+                },
+                function (error) {
+                    if (error.data) {
+                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                    } else {
+                        messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                    }
+                });
     };
 
     $scope.editService = function () {
         var newData = angular.copy($scope.serviceData);
         delete(newData.name);
         servicesFactory.edit($scope.serviceData.name, newData)
-            .success(function () {
-                messageHandler.showSuccessMessage('Edytowano pomyślnie');
-                refreshList();
-                $scope.changeSelected($scope.serviceData.name);
-            })
-            .error(function (error) {
-                if (error) {
-                    messageHandler.showErrorMessage('Błąd ', error.message);
-                } else {
-                    messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
-                }
-            });
+            .then(
+                function () {
+                    messageHandler.showSuccessMessage('Edytowano pomyślnie');
+                    refreshList();
+                    $scope.changeSelected($scope.serviceData.name);
+                },
+                function (error) {
+                    if (error.data) {
+                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                    } else {
+                        messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                    }
+                });
     };
 
     $scope.changeWholeDay = function (wholeDay) {

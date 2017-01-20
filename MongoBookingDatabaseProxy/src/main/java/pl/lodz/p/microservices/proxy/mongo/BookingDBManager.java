@@ -12,7 +12,7 @@ import io.vertx.ext.mongo.MongoClient;
  */
 class BookingDBManager {
     private static final String COLLECTION_BOOKINGS = "Bookings";
-    private static final Logger log = LoggerFactory.getLogger(MongoDatabaseProxyService.class);
+    private static final Logger log = LoggerFactory.getLogger(MongoBookingDatabaseProxyService.class);
 
     static void getBookingsList(Message<JsonObject> inMessage, MongoClient mongoClient) {
         log.info("Called method GET_BOOKINGS_LIST");
