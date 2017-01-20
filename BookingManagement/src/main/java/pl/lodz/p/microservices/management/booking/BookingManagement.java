@@ -33,19 +33,15 @@ public class BookingManagement extends AbstractVerticle {
     }
 
     private void messageHandler(Message<JsonObject> inMessage) {
-        if (inMessage.body() == null) {
-            log.error("Empty message received.");
-            inMessage.fail(400, "Received method call without body");
-            return;
-        }
         String requestedMethod = inMessage.headers().get(METHOD_KEY);
 
         if (!EnumUtils.isValidEnum(Methods.class, requestedMethod)) {
-            log.error("Method not found");
-            inMessage.fail(500, "BookingsManagement: Method" + requestedMethod + " not found");
+            log.error("Method" + requestedMethod + " not found");
+            inMessage.fail(500, "Method" + requestedMethod + " not found");
             return;
         }
 
+        log.info("Received message. Method " + requestedMethod + " will be called.");
         switch (Methods.valueOf(requestedMethod)) {
             case DELETE_BOOKING:
                 deleteBooking(inMessage);
@@ -62,17 +58,21 @@ public class BookingManagement extends AbstractVerticle {
             case EDIT_BOOKING:
                 editBooking(inMessage);
                 break;
+            case GET_TAKEN_DATES:
+                getTakenDatesList(inMessage);
+                break;
+            case DELETE_USER_BOOKINGS:
+                deleteUserBookings(inMessage);
+                break;
         }
     }
 
-    // FIXME niepotrzebne?
     private void getBookingsList(Message<JsonObject> inMessage) {
-        log.info("Called method GET_BOOKINGS_LIST");
         eventBus.send(DATABASE_BOOKING_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_BOOKINGS_LIST"),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_BOOKINGS_LIST_FROM_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
-                        JsonObject replyList = new JsonObject().put("list", objectToArray(response.result().body()));
+                        JsonObject replyList = Utils.idObjectsToFields(response.result().body());
                         inMessage.reply(replyList);
                     } else {
                         ReplyException cause = (ReplyException) response.cause();
@@ -81,10 +81,7 @@ public class BookingManagement extends AbstractVerticle {
                 });
     }
 
-    // FIXME niepotrzebne?
     private void getBookingDetails(Message<JsonObject> inMessage) {
-        log.info("Called method GET_BOOKING_DETAILS with message body: " + inMessage.body());
-
         if (inMessage.body() == null) {
             log.error("Received GET_BOOKING_DETAILS command without json object");
             inMessage.fail(400, "Received method call without JsonObject");
@@ -97,7 +94,7 @@ public class BookingManagement extends AbstractVerticle {
         JsonObject query = new JsonObject().put("_id", inMessage.body().getString("id"));
 
         eventBus.send(DATABASE_BOOKING_PROXY_SERVICE_ADDRESS, query,
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_BOOKING_DETAILS"),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_BOOKING_DETAILS_FROM_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         JsonObject result = response.result().body();
@@ -109,11 +106,45 @@ public class BookingManagement extends AbstractVerticle {
                 });
     }
 
-    // FIXME niepotrzebne?
-    private void saveNewBooking(Message<JsonObject> inMessage) {
-        log.info("Called method SAVE_NEW_BOOKING with message body: " + inMessage.body());
 
-        if (!inMessage.body().containsKey("booking")) {
+    private void getTakenDatesList(Message<JsonObject> inMessage) {
+        if (inMessage.body() == null) {
+            log.error("Received GET_TAKEN_DATES_LIST command without json object");
+            inMessage.fail(400, "Received method call without JsonObject");
+            return;
+        } else if (!inMessage.body().containsKey("name") || StringUtils.isBlank(inMessage.body().getString("name"))) {
+            log.error("Received GET_TAKEN_DATES_LIST command without service name");
+            inMessage.fail(400, "Bad request. Field 'serviceName' is required.");
+            return;
+        } else if (!inMessage.body().containsKey("date") || StringUtils.isBlank(inMessage.body().getString("date"))) {
+            log.error("Received GET_TAKEN_DATES_LIST command without date prefix");
+            inMessage.fail(400, "Bad request. Field 'date' is required.");
+            return;
+        }
+
+        JsonObject query = new JsonObject().put("serviceName", inMessage.body().getString("name")
+        ).put("date", inMessage.body().getString("date"));
+
+        eventBus.send(DATABASE_BOOKING_PROXY_SERVICE_ADDRESS, query,
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_TAKEN_DATES_FROM_DATABASE"),
+                (AsyncResult<Message<JsonObject>> response) -> {
+                    if (response.succeeded()) {
+                        JsonObject replyList = new JsonObject().put("list", Utils.dateObjectsToArray(response.result().body()));
+                        inMessage.reply(replyList);
+                    } else {
+                        ReplyException cause = (ReplyException) response.cause();
+                        inMessage.fail(cause.failureCode(), cause.getMessage());
+                    }
+                });
+    }
+
+    private void saveNewBooking(Message<JsonObject> inMessage) {
+        if (inMessage.body() == null) {
+            log.error("Received SAVE_NEW_BOOKING command without json object");
+            inMessage.fail(400, "Received method call without JsonObject");
+            return;
+        } else if (!inMessage.body().containsKey("booking")) {
+            log.error("Received SAVE_NEW_BOOKING command without json object");
             inMessage.fail(400, "Bad Request. Key 'booking' is required.");
             return;
         }
@@ -121,17 +152,23 @@ public class BookingManagement extends AbstractVerticle {
 
         if (!newBooking.containsKey("userLogin") ||
                 StringUtils.isBlank(newBooking.getString("userLogin"))) {
+            log.error("Received SAVE_NEW_BOOKING command without user login");
             inMessage.fail(400, "Bad Request. Field 'userLogin' is required.");
             return;
-        }
-        if (!newBooking.containsKey("serviceName") ||
+        } else if (!newBooking.containsKey("serviceName") ||
                 StringUtils.isBlank(newBooking.getString("serviceName"))) {
+            log.error("Received SAVE_NEW_BOOKING command without service name");
             inMessage.fail(400, "Bad Request. Field 'userLogin' is required.");
+            return;
+        } if (!newBooking.containsKey("date") ||
+                StringUtils.isBlank(newBooking.getString("date"))) {
+            log.error("Received SAVE_NEW_BOOKING command without date");
+            inMessage.fail(400, "Bad Request. Field 'date' is required.");
             return;
         }
 
-        eventBus.send(DATABASE_BOOKING_PROXY_SERVICE_ADDRESS, newBooking,
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "SAVE_NEW_BOOKING"),
+        eventBus.send(DATABASE_BOOKING_PROXY_SERVICE_ADDRESS, Utils.addCreateDate(newBooking),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "SAVE_NEW_BOOKING_IN_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         inMessage.reply(response.result().body());
@@ -142,23 +179,28 @@ public class BookingManagement extends AbstractVerticle {
                 });
     }
 
-    // FIXME niepotrzebne?
-    private void editBooking(Message<JsonObject> inMessage) {
-        log.info("Called method EDIT_BOOKING with message body: " + inMessage.body());
 
-        if (!inMessage.body().containsKey("booking")) {
+    // FIXME nie wiem czy bedzie wykorzystywane
+    private void editBooking(Message<JsonObject> inMessage) {
+        if (inMessage.body() == null) {
+            log.error("Received EDIT_BOOKING command without json object");
+            inMessage.fail(400, "Received method call without JsonObject");
+            return;
+        } else if (!inMessage.body().containsKey("booking")) {
+            log.error("Received EDIT_BOOKING command without booking data");
             inMessage.fail(400, "Bad Request. Booking data is required.");
             return;
         }
         if (!inMessage.body().containsKey("id")) {
-            inMessage.fail(400, "Bad Request. Booking login is required.");
+            log.error("Received EDIT_BOOKING command without booking id");
+            inMessage.fail(400, "Bad Request. Booking id is required.");
             return;
         }
         JsonObject query = new JsonObject().put("booking", inMessage.body().getJsonObject("booking"))
                 .put("_id", inMessage.body().getString("id"));
 
         eventBus.send(DATABASE_BOOKING_PROXY_SERVICE_ADDRESS, query,
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "EDIT_BOOKING"),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "EDIT_BOOKING_IN_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         inMessage.reply(response.result().body());
@@ -169,17 +211,20 @@ public class BookingManagement extends AbstractVerticle {
                 });
     }
 
-    // FIXME niepotrzebne?
     private void deleteBooking(Message<JsonObject> inMessage) {
-        log.info("Called method DELETE_BOOKING with message body: " + inMessage.body());
-        if (!inMessage.body().containsKey("id") ||
+        if (inMessage.body() == null) {
+            log.error("Received DELETE_BOOKING command without json object");
+            inMessage.fail(400, "Received method call without JsonObject");
+            return;
+        } else if (!inMessage.body().containsKey("id") ||
                 StringUtils.isBlank(inMessage.body().getString("id"))) {
+            log.error("Received DELETE_BOOKING command without booking id");
             inMessage.fail(400, "Bad Request. Field 'id' is required.");
             return;
         }
         JsonObject query = new JsonObject().put("_id", inMessage.body().getString("id"));
         eventBus.send(DATABASE_BOOKING_PROXY_SERVICE_ADDRESS, query,
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "DELETE_BOOKING"),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "DELETE_BOOKING_FROM_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         inMessage.reply(response.result().body());
@@ -190,13 +235,27 @@ public class BookingManagement extends AbstractVerticle {
                 });
     }
 
-    // TODO move it to separate Helpers class
-    private JsonArray objectToArray(JsonObject object) {
-        JsonArray array = new JsonArray();
-        JsonArray given = object.getJsonArray("list");
-        for (int i = 0; i < given.size(); i++) {
-            array.add(given.getJsonObject(i).getJsonObject("_id").getString("$oid"));
+    private void deleteUserBookings(Message<JsonObject> inMessage) {
+        if (inMessage.body() == null) {
+            log.error("Received DELETE_USER_BOOKINGS command without json object");
+            inMessage.fail(400, "Received method call without JsonObject");
+            return;
+        } else if (!inMessage.body().containsKey("login") ||
+                StringUtils.isBlank(inMessage.body().getString("login"))) {
+            log.error("Received DELETE_USER_BOOKINGS command without user login");
+            inMessage.fail(400, "Bad Request. Field 'login' is required.");
+            return;
         }
-        return array;
+        JsonObject query = new JsonObject().put("login", inMessage.body().getString("login"));
+        eventBus.send(DATABASE_BOOKING_PROXY_SERVICE_ADDRESS, query,
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "DELETE_USER_BOOKINGS_FROM_DATABASE"),
+                (AsyncResult<Message<JsonObject>> response) -> {
+                    if (response.succeeded()) {
+                        inMessage.reply(response.result().body());
+                    } else {
+                        ReplyException cause = (ReplyException) response.cause();
+                        inMessage.fail(cause.failureCode(), cause.getMessage());
+                    }
+                });
     }
 }

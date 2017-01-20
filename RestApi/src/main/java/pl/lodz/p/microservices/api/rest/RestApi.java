@@ -7,7 +7,6 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -33,7 +32,7 @@ public class RestApi extends AbstractVerticle {
 
     private static final String SERVICES_ENDPOINT = "/api/services";
     private static final String USERS_ENDPOINT = "/api/users";
-    private static final String BOOKING_ENDPOINT = "/api/booking";
+    private static final String BOOKING_ENDPOINT = "/api/bookings";
     private static final String AUTHENTICATE_ENDPOINT = "/api/authenticate";
 
     private static final Logger log = LoggerFactory.getLogger(RestApi.class);
@@ -88,7 +87,7 @@ public class RestApi extends AbstractVerticle {
         router.put(SERVICES_ENDPOINT + "/:name").handler(context -> requestHandler(context,
                 ServicesManagementMethods.EDIT_SERVICE,
                 SERVICES_MANAGEMENT_SERVICE_ADDRESS,
-                "name",
+                "login",
                 context.getBodyAsJson(),
                 true));
 
@@ -123,7 +122,6 @@ public class RestApi extends AbstractVerticle {
                 context.getBodyAsJson(),
                 true));
 
-
         // Auth endpoint
         router.post(AUTHENTICATE_ENDPOINT).handler(context -> requestHandler(context,
                 AuthServiceMethods.LOGIN,
@@ -132,15 +130,23 @@ public class RestApi extends AbstractVerticle {
                 false));
 
         // Booking endpoint
-        router.get(BOOKING_ENDPOINT).handler(context -> requestHandler(context,
+        router.get(BOOKING_ENDPOINT).handler(context -> requestWithQueryHandler(context,
                 BookingManagementMethods.GET_BOOKINGS_LIST,
                 BOOKINGS_MANAGEMENT_SERVICE_ADDRESS,
+                "login",
                 true));
 
         router.get(BOOKING_ENDPOINT + "/:id").handler(context -> requestHandler(context,
                 BookingManagementMethods.GET_BOOKING_DETAILS,
                 BOOKINGS_MANAGEMENT_SERVICE_ADDRESS,
                 "id",
+                true));
+
+        router.get(BOOKING_ENDPOINT + "/dates" + "/:name/:date").handler(context -> requestHandler(context,
+                BookingManagementMethods.GET_TAKEN_DATES,
+                BOOKINGS_MANAGEMENT_SERVICE_ADDRESS,
+                "name",
+                "date",
                 true));
 
         router.delete(BOOKING_ENDPOINT + "/:id").handler(context -> requestHandler(context,
@@ -165,9 +171,30 @@ public class RestApi extends AbstractVerticle {
         vertx.createHttpServer().requestHandler(router::accept).listen(8094);
     }
 
+    private void requestWithQueryHandler(RoutingContext context, Enum method, String address, String queryParameter, boolean permissionCheck) {
+        JsonObject body = new JsonObject();
+        if (context.request().query() != null && !context.request().query().equals("") && context.request().query().contains(queryParameter)) {
+            String[] params = context.request().query().split("&");
+            for (int i = 0; i < params.length; i++) {
+                if (params[i].contains(queryParameter)) {
+                    String parameterValue = params[0].replace(queryParameter + "=", "");
+                    body.put(queryParameter, parameterValue);
+                    break;
+                }
+            }
+        }
+        requestHandler(context, method, address, body, permissionCheck);
+    }
+
     private void requestHandler(RoutingContext context, Enum method, String address, String parameter, boolean permissionCheck) {
         String parameterValue = context.request().getParam(parameter);
         requestHandler(context, method, address, new JsonObject().put(parameter, parameterValue), permissionCheck);
+    }
+
+    private void requestHandler(RoutingContext context, Enum method, String address, String parameter1, String parameter2, boolean permissionCheck) {
+        String parameter1Value = context.request().getParam(parameter1);
+        String parameter2Value = context.request().getParam(parameter2);
+        requestHandler(context, method, address, new JsonObject().put(parameter1, parameter1Value).put(parameter2, parameter2Value), permissionCheck);
     }
 
     private void requestHandler(RoutingContext context, Enum method, String address, String parameter, JsonObject body, boolean permissionCheck) {
@@ -197,7 +224,7 @@ public class RestApi extends AbstractVerticle {
         JsonObject parameters = new JsonObject();
         if (jsonMessage.containsKey("login")) {
             parameters.put("login", jsonMessage.getString("login"));
-            // parameters can be added when needed
+            // parameters to sent to auth service can be added when needed
         }
         JsonObject message = new JsonObject().put("token", routingContext.request().getHeader("Auth-Token"))
                 .put("method", method)
@@ -244,7 +271,7 @@ public class RestApi extends AbstractVerticle {
     }
 
     private void respond(RoutingContext routingContext, int code, String message) {
-        if(code < 1){
+        if (code < 1) {
             code = 500;
         }
         routingContext.response()

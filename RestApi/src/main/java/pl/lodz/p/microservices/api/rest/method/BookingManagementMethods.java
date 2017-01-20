@@ -5,5 +5,6 @@ public enum BookingManagementMethods {
     SAVE_NEW_BOOKING,
     GET_BOOKINGS_LIST,
     GET_BOOKING_DETAILS,
-    EDIT_BOOKING
+    EDIT_BOOKING,
+    GET_TAKEN_DATES
 }

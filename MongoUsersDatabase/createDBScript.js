@@ -28,6 +28,10 @@ db.createCollection("Users", {
                 $type: "string",
                 $exists: true
             },
+            createdDate: {
+                $type: "string",
+                $exists: true
+            },
             "permissions.canManageServices": {
                 $type: "bool",
                 $exists: true
@@ -83,6 +87,7 @@ print(db.Users.insert({
     firstName: "P",
     lastName: "B",
     email: "piotr.bubel@wp.pl",
+    createdDate: "2017-01-02",
     permissions: {
         canManageServices: true,
         canManageUsers: true,

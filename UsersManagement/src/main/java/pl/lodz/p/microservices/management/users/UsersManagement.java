@@ -13,12 +13,12 @@ import io.vertx.core.logging.LoggerFactory;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
-import pl.lodz.p.microservices.management.users.Methods;
 
 public class UsersManagement extends AbstractVerticle {
 
     private static final String USERS_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.users.UsersManagement";
     private static final String DATABASE_USERS_PROXY_SERVICE_ADDRESS = "pl.lodz.p.microservices.proxy.mongo.DatabaseUsersProxyService";
+    private static final String BOOKINGS_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.booking.BookingManagement";
 
     private static final String METHOD_KEY = "method";
     private static final int TIMEOUT = 4000;
@@ -34,19 +34,15 @@ public class UsersManagement extends AbstractVerticle {
     }
 
     private void messageHandler(Message<JsonObject> inMessage) {
-        if (inMessage.body() == null) {
-            log.error("Empty message received.");
-            inMessage.fail(400, "Received method call without body");
-            return;
-        }
         String requestedMethod = inMessage.headers().get(METHOD_KEY);
 
         if (!EnumUtils.isValidEnum(Methods.class, requestedMethod)) {
-            log.error("Method not found");
-            inMessage.fail(500, "UsersManagement: Method" + requestedMethod + " not found");
+            log.error("Method" + requestedMethod + " not found");
+            inMessage.fail(500, "Method" + requestedMethod + " not found");
             return;
         }
 
+        log.info("Received message. Method " + requestedMethod + " will be called.");
         switch (Methods.valueOf(requestedMethod)) {
             case DELETE_USER:
                 deleteUser(inMessage);
@@ -66,11 +62,9 @@ public class UsersManagement extends AbstractVerticle {
         }
     }
 
-    // FIXME niepotrzebne?
     private void getUsersList(Message<JsonObject> inMessage) {
-        log.info("Called method GET_USERS_LIST");
         eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_USERS_LIST"),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_USERS_LIST_FROM_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         JsonObject replyList = new JsonObject().put("list", jsonObjectToArray(response.result().body()));
@@ -82,10 +76,7 @@ public class UsersManagement extends AbstractVerticle {
                 });
     }
 
-    // FIXME niepotrzebne?
     private void getUserDetails(Message<JsonObject> inMessage) {
-        log.info("Called method GET_USER_DETAILS with message body: " + inMessage.body());
-
         if (inMessage.body() == null) {
             log.error("Received GET_USER_DETAILS command without json object");
             inMessage.fail(400, "Received method call without JsonObject");
@@ -97,7 +88,7 @@ public class UsersManagement extends AbstractVerticle {
         }
 
         eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_USER_DETAILS"),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_USER_DETAILS_FROM_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         JsonObject result = response.result().body();
@@ -110,24 +101,27 @@ public class UsersManagement extends AbstractVerticle {
                 });
     }
 
-    // FIXME niepotrzebne?
     private void saveNewUser(Message<JsonObject> inMessage) {
-        log.info("Called method SAVE_NEW_USER with message body: " + inMessage.body());
-
-        if (!inMessage.body().containsKey("user")) {
+        if (inMessage.body() == null) {
+            log.error("Received SAVE_NEW_USER command without json object");
+            inMessage.fail(400, "Received method call without JsonObject");
+            return;
+        } else if (!inMessage.body().containsKey("user")) {
+            log.error("Received SAVE_NEW_USER command without user data");
             inMessage.fail(400, "Bad Request. Key 'user' is required.");
             return;
         }
-        JsonObject newService = inMessage.body().getJsonObject("user");
+        JsonObject newUser = inMessage.body().getJsonObject("user");
 
-        if (!newService.containsKey("login") ||
-                StringUtils.isBlank(newService.getString("login"))) {
+        if (!newUser.containsKey("login") ||
+                StringUtils.isBlank(newUser.getString("login"))) {
+            log.error("Received SAVE_NEW_USER command without user login");
             inMessage.fail(400, "Bad Request. Fields 'login' is required.");
             return;
         }
-
-        eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, newService,
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "SAVE_NEW_USER"),
+        Utils.addCreatedDate(newUser);
+        eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, newUser,
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "SAVE_NEW_USER_IN_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         inMessage.reply(response.result().body());
@@ -138,21 +132,23 @@ public class UsersManagement extends AbstractVerticle {
                 });
     }
 
-    // FIXME niepotrzebne?
     private void editUser(Message<JsonObject> inMessage) {
-        log.info("Called method EDIT_USER with message body: " + inMessage.body());
-
-        if (!inMessage.body().containsKey("user")) {
+        if (inMessage.body() == null) {
+            log.error("Received EDIT_USER command without json object");
+            inMessage.fail(400, "Received method call without JsonObject");
+            return;
+        } else if (!inMessage.body().containsKey("user")) {
+            log.error("Received EDIT_USER command without user data");
             inMessage.fail(400, "Bad Request. User data is required.");
             return;
-        }
-        if (!inMessage.body().containsKey("login")) {
+        } else if (!inMessage.body().containsKey("login")) {
+            log.error("Received EDIT_USER command without user login");
             inMessage.fail(400, "Bad Request. User login is required.");
             return;
         }
 
         eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "EDIT_USER"),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "EDIT_USER_IN_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         inMessage.reply(response.result().body());
@@ -163,16 +159,32 @@ public class UsersManagement extends AbstractVerticle {
                 });
     }
 
-    // FIXME niepotrzebne?
     private void deleteUser(Message<JsonObject> inMessage) {
-        log.info("Called method DELETE_USER with message body: " + inMessage.body());
-        eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "DELETE_USER"),
-                (AsyncResult<Message<JsonObject>> response) -> {
-                    if (response.succeeded()) {
-                        inMessage.reply(response.result().body());
+        if (inMessage.body() == null) {
+            log.error("Received DELETE_USER command without json object");
+            inMessage.fail(400, "Received method call without JsonObject");
+            return;
+        } else if (!inMessage.body().containsKey("login")) {
+            log.error("Received DELETE_USER command without user login");
+            inMessage.fail(400, "Received method call without valid JsonObject");
+            return;
+        }
+
+        eventBus.send(BOOKINGS_MANAGEMENT_SERVICE_ADDRESS, inMessage.body(), new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "DELETE_USER_BOOKINGS"),
+                (AsyncResult<Message<JsonObject>> bookingsResponse) -> {
+                    if (bookingsResponse.succeeded()) {
+                        eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, inMessage.body(),
+                                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "DELETE_USER_FROM_DATABASE"),
+                                (AsyncResult<Message<JsonObject>> userResponse) -> {
+                                    if (userResponse.succeeded()) {
+                                        inMessage.reply(userResponse.result().body());
+                                    } else {
+                                        ReplyException cause = (ReplyException) userResponse.cause();
+                                        inMessage.fail(cause.failureCode(), cause.getMessage());
+                                    }
+                                });
                     } else {
-                        ReplyException cause = (ReplyException) response.cause();
+                        ReplyException cause = (ReplyException) bookingsResponse.cause();
                         inMessage.fail(cause.failureCode(), cause.getMessage());
                     }
                 });
