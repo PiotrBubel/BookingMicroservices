@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 public class ServicesManagement extends AbstractVerticle {
 
     private static final String SERVICES_MANAGEMENT_SERVICE_ADDRESS = "pl.lodz.p.microservices.management.services.ServicesManagement";
-    private static final String DATABASE_PROXY_SERVICE_ADDRESS = "pl.lodz.p.microservices.proxy.mongo.DatabaseProxyService";
+    private static final String DATABASE_SERVICES_PROXY_SERVICE_ADDRESS = "pl.lodz.p.microservices.proxy.mongo.DatabaseServicesProxyService";
 
     private static final String METHOD_KEY = "method";
     private static final int TIMEOUT = 4000;
@@ -68,7 +68,7 @@ public class ServicesManagement extends AbstractVerticle {
     // FIXME niepotrzebne?
     private void getServicesList(Message<JsonObject> inMessage) {
         log.info("Called method GET_SERVICES_LIST");
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
+        eventBus.send(DATABASE_SERVICES_PROXY_SERVICE_ADDRESS, inMessage.body(),
                 new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_SERVICES_LIST"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
@@ -95,7 +95,7 @@ public class ServicesManagement extends AbstractVerticle {
             return;
         }
 
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
+        eventBus.send(DATABASE_SERVICES_PROXY_SERVICE_ADDRESS, inMessage.body(),
                 new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_SERVICE_DETAILS"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
@@ -123,7 +123,7 @@ public class ServicesManagement extends AbstractVerticle {
             return;
         }
 
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, newService,
+        eventBus.send(DATABASE_SERVICES_PROXY_SERVICE_ADDRESS, newService,
                 new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "SAVE_NEW_SERVICE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
@@ -148,7 +148,7 @@ public class ServicesManagement extends AbstractVerticle {
             return;
         }
 
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
+        eventBus.send(DATABASE_SERVICES_PROXY_SERVICE_ADDRESS, inMessage.body(),
                 new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "EDIT_SERVICE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
@@ -163,7 +163,7 @@ public class ServicesManagement extends AbstractVerticle {
     // FIXME niepotrzebne?
     private void deleteService(Message<JsonObject> inMessage) {
         log.info("Called method DELETE_SERVICE with message body: " + inMessage.body());
-        eventBus.send(DATABASE_PROXY_SERVICE_ADDRESS, inMessage.body(),
+        eventBus.send(DATABASE_SERVICES_PROXY_SERVICE_ADDRESS, inMessage.body(),
                 new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "DELETE_SERVICE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {

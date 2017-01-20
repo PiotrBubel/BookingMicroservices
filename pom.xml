@@ -10,7 +10,8 @@
 
     <modules>
         <module>MongoDatabase</module>
-        <module>MongoDatabaseProxy</module>
+        <module>MongoServicesDatabaseProxy</module>
+        <module>MongoBookingDatabaseProxy</module>
         <module>MongoUsersDatabase</module>
         <module>MongoUsersDatabaseProxy</module>
         <module>ServicesManagement</module>

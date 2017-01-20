@@ -44,7 +44,7 @@
                 </div>
                 <div class="col-md-8 form-group"
                      ng-class="{ 'has-error': newUserForm.login.$error.required && newUserForm.login.$dirty }">
-                    <input class="form-control" type="text" name="login" ng-model="userData.login">
+                    <input class="form-control" type="text" name="login" ng-model="userData.login" ng-pattern=loginPattern>
                     <div class="color-warning" ng-show="newUserForm.login.$error.required && newUserForm.login.$dirty">
                         Pole jest wymagane
                     </div>

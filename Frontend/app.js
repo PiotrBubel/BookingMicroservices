@@ -1,6 +1,6 @@
 'use strict';
 
-var myApp = angular.module('myApp', ['ngRoute', 'ngMessages', 'ngCookies'])
+var myApp = angular.module('myApp', ['ngRoute', 'ngMessages', 'ngCookies', 'ngMaterial'])
 
     .config(['$routeProvider', '$locationProvider',
         function ($routeProvider, $locationProvider) {
@@ -30,9 +30,12 @@ var myApp = angular.module('myApp', ['ngRoute', 'ngMessages', 'ngCookies'])
 
 myApp.controller("navbarController", function ($http, $scope, $cookies, $location, $rootScope) {
     $rootScope.globalUser = $cookies.getObject('user');
+    $rootScope.token = $cookies.getObject('token');
 
     $scope.logout = function () {
         $cookies.remove('user');
+        $cookies.remove('token');
         delete($rootScope.globalUser);
+        delete($rootScope.token);
     };
 });

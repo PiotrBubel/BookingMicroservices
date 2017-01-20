@@ -1,0 +1,7 @@
+{
+  "mongo_db": "BookingsServiceDB",
+  "mongo_host": "mongodatabase",
+  "mongo_port": 27017,
+  "mongo_username": "BookingsServiceApp",
+  "mongo_password": "BookingsServicep@Ssw0rd"
+}
