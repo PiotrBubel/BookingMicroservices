@@ -207,7 +207,16 @@ public class RestApi extends AbstractVerticle {
     }
 
     private void requestHandler(RoutingContext context, Enum method, String address, JsonObject body, boolean permissionCheck) {
-        log.info("Passing request to start method: " + method.name() + " to microservice: " + address);
+        String logInfo = "Passing request to start method: " + method.name() + " to microservice: " + address;
+        if (permissionCheck) {
+            logInfo += " with permission check first.";
+        }
+        log.info(logInfo);
+        if (body != null) {
+            log.info("Incoming message: " + body.encodePrettily());
+        } else {
+            log.info("Without message.");
+        }
 
         final DeliveryOptions options = new DeliveryOptions()
                 .setSendTimeout(3500)
@@ -248,6 +257,7 @@ public class RestApi extends AbstractVerticle {
                 response -> {
                     if (!response.succeeded()) {
                         ReplyException cause = (ReplyException) response.cause();
+                        log.info("Responding with 403 Forbidden");
                         respond(routingContext, cause.failureCode(), cause.getMessage());
                         return;
                     }
@@ -258,12 +268,16 @@ public class RestApi extends AbstractVerticle {
                         respond(routingContext, 500, "Internal server error. Server does not respond with application/json");
                         return;
                     }
+                    String logInfo = "Responding with ";
                     if (resultBody.containsKey("code")) {
                         routingContext.response().setStatusCode(resultBody.getInteger("code"));
+                        logInfo += resultBody.getInteger("code");
                     }
                     if (resultBody.containsKey("message")) {
                         routingContext.response().setStatusMessage(resultBody.getString("message"));
+                        logInfo += resultBody.getString("message");
                     }
+                    log.info(logInfo);
                     routingContext.response()
                             .putHeader("Content-Type", MediaType.JSON_UTF_8.toString())
                             .end(resultBody.encodePrettily());
@@ -274,6 +288,7 @@ public class RestApi extends AbstractVerticle {
         if (code < 1) {
             code = 500;
         }
+        log.info("Responding with: " + code + " " + message);
         routingContext.response()
                 .putHeader("Content-Type", MediaType.JSON_UTF_8.toString())
                 .setStatusCode(code)
