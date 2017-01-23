@@ -158,7 +158,7 @@ public class BookingManagement extends AbstractVerticle {
         } else if (!newBooking.containsKey("serviceName") ||
                 StringUtils.isBlank(newBooking.getString("serviceName"))) {
             log.error("Received SAVE_NEW_BOOKING command without service name");
-            inMessage.fail(400, "Bad Request. Field 'userLogin' is required.");
+            inMessage.fail(400, "Bad Request. Field 'serviceName' is required.");
             return;
         } if (!newBooking.containsKey("date") ||
                 StringUtils.isBlank(newBooking.getString("date"))) {
