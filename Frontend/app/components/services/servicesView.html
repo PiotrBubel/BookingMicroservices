@@ -106,7 +106,7 @@
                 </div>
                 <div class="col-md-8">
                     {{ serviceData.price + 'PLN' }}
-                    <span ng-if="!helper.wholeDay">{{ '/ ' + serviceData.timePeriod + 'min' }}</span>
+                    <span ng-if="!helper.wholeDay">{{serviceData.timePeriod }}</span>
                 </div>
             </div>
         </div>

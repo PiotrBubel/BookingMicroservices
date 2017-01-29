@@ -7,8 +7,12 @@ myApp.factory("bookingFactory", function ($http, $rootScope, appConfig) {
     };
 
     return {
-        getList: function () {
-            return $http.get(appConfig.apiAddress + '/bookings', headers());
+        getList: function (userLogin) {
+            var parameters = '';
+            if (userLogin) {
+                parameters = '?login=' + userLogin;
+            }
+            return $http.get(appConfig.apiAddress + '/bookings' + parameters, headers());
         },
         getDetails: function (id) {
             return $http.get(appConfig.apiAddress + '/bookings/' + id, headers());

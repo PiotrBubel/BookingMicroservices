@@ -150,6 +150,9 @@
                         Usuń
                     </button>
                 </div>
+                <h4><span ng-if="!createNew && userData.login === globalUser.login" class="color-warning">
+                    Uwaga! Edycja własnego konta użytkownika spowoduje wylogowanie
+                </span></h4>
             </form>
             <div class="message-container">
                 <div ng-model="errorMessage" ng-show="showErrorMessage" class="alert alert-danger fade in"><strong>

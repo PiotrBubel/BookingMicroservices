@@ -1,63 +1,63 @@
 version: "2"
 
 services:
-#  mongobookingdatabase:
-#    image: microservices/mongobookingdatabase:latest
-#    volumes:
-#     - /data/db/bookings:/data/db
-#    restart: always
-#
-#  mongoservicesdatabase:
-#    image: microservices/mongoservicesdatabase:latest
-#    volumes:
-#     - /data/db/services:/data/db
-#    restart: always
-#
-#  mongobookingdatabaseproxy:
-#    image: microservices/mongobookingdatabaseproxy:latest
-#    links:
-#      - mongobookingdatabase
-#    restart: always
-#
-#  mongoservicesdatabaseproxy:
-#    image: microservices/mongoservicesdatabaseproxy:latest
-#    links:
-#      - mongoservicesdatabase
-#    restart: always
-#
-#  mongousersdatabase:
-#    image: microservices/mongousersdatabase:latest
-#    volumes:
-#     - /data/db/users:/data/db
-#    restart: always
-#
-#  mongousersdatabaseproxy:
-#    image: microservices/mongousersdatabaseproxy:latest
-#    links:
-#      - mongousersdatabase
-#    restart: always
-#
-#  servicesmanagement:
-#    image: microservices/servicesmanagement:latest
-#    restart: always
-#
-#  usersmanagement:
-#    image: microservices/usersmanagement:latest
-#    restart: always
-#
-#  bookingmanagement:
-#    image: microservices/bookingmanagement:latest
-#    restart: always
-#
-#  authservice:
-#    image: microservices/authservice:latest
-#    restart: always
-#
-#  restapi:
-#    image: microservices/restapi:latest
-#    ports:
-#          - "8094:8094"
-#    restart: always
+  mongobookingdatabase:
+    image: microservices/mongobookingdatabase:latest
+    volumes:
+     - /data/db/bookings:/data/db
+    restart: always
+
+  mongoservicesdatabase:
+    image: microservices/mongoservicesdatabase:latest
+    volumes:
+     - /data/db/services:/data/db
+    restart: always
+
+  mongobookingdatabaseproxy:
+    image: microservices/mongobookingdatabaseproxy:latest
+    links:
+      - mongobookingdatabase
+    restart: always
+
+  mongoservicesdatabaseproxy:
+    image: microservices/mongoservicesdatabaseproxy:latest
+    links:
+      - mongoservicesdatabase
+    restart: always
+
+  mongousersdatabase:
+    image: microservices/mongousersdatabase:latest
+    volumes:
+     - /data/db/users:/data/db
+    restart: always
+
+  mongousersdatabaseproxy:
+    image: microservices/mongousersdatabaseproxy:latest
+    links:
+      - mongousersdatabase
+    restart: always
+
+  servicesmanagement:
+    image: microservices/servicesmanagement:latest
+    restart: always
+
+  usersmanagement:
+    image: microservices/usersmanagement:latest
+    restart: always
+
+  bookingmanagement:
+    image: microservices/bookingmanagement:latest
+    restart: always
+
+  authservice:
+    image: microservices/authservice:latest
+    restart: always
+
+  restapi:
+    image: microservices/restapi:latest
+    ports:
+          - "8094:8094"
+    restart: always
 
   frontend:
     image: microservices/frontend:latest

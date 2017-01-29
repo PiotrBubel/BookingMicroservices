@@ -31,7 +31,7 @@ var myApp = angular.module('myApp', ['ngRoute', 'ngMessages', 'ngCookies', 'ngMa
             $locationProvider.html5Mode(false).hashPrefix('!');
         }]);
 
-myApp.controller("navbarController", function ($http, $scope, $cookies, $location, $rootScope, loginFactory) {
+myApp.controller("navbarController", function ($http, $scope, $cookies, $location, $rootScope) {
     $rootScope.globalUser = $cookies.getObject('user');
     $rootScope.token = $cookies.getObject('token');
 

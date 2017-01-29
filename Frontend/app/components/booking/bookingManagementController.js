@@ -17,7 +17,7 @@ myApp.controller("bookingManagementController", function ($scope, $timeout, $roo
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd pobierania danych ', error.data.message);
+                        messageHandler.showErrorMessage('Błąd pobierania listy usług ', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
@@ -36,7 +36,7 @@ myApp.controller("bookingManagementController", function ($scope, $timeout, $roo
                             },
                             function (error) {
                                 if (error.data) {
-                                    messageHandler.showErrorMessage('Błąd pobierania danych ', error.data.message);
+                                    messageHandler.showErrorMessage('Błąd pobierania szczegółów usługi ', error.data.message);
                                 } else {
                                     messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                                 }
@@ -44,7 +44,7 @@ myApp.controller("bookingManagementController", function ($scope, $timeout, $roo
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd pobierania danych ', error.data.message);
+                        messageHandler.showErrorMessage('Błąd pobierania szczegółów rezerwacji ', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
@@ -62,7 +62,7 @@ myApp.controller("bookingManagementController", function ($scope, $timeout, $roo
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                        messageHandler.showErrorMessage('Błąd podczas usuwania rezerwacji ', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }

@@ -22,7 +22,8 @@
                     <span class="icon-bar"></span>
                 </button>
                 <!--<a class="navbar-brand"><img src="/assets/img/logo.png" alt="logo"/></a>-->
-                <a class="navbar-brand" aria-selected="true" ng-href="#!/main">Booking Microservices</a>
+                <a class="navbar-brand" ng-if="!globalUser.login" aria-selected="true" ng-href="#!/login">Booking Microservices</a>
+                <a class="navbar-brand" ng-if="globalUser.login" aria-selected="true" ng-href="#!/account">Booking Microservices</a>
             </div>
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">

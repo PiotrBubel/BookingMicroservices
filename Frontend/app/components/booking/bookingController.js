@@ -68,7 +68,7 @@ myApp.controller("bookingController", function ($scope, $timeout, $filter, $root
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd pobierania danych ', error.data.message);
+                        messageHandler.showErrorMessage('Błąd pobierania listy usług ', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
@@ -87,7 +87,7 @@ myApp.controller("bookingController", function ($scope, $timeout, $filter, $root
                         },
                         function (error) {
                             if (error.data) {
-                                messageHandler.showErrorMessage('Błąd pobierania danych ', error.data.message);
+                                messageHandler.showErrorMessage('Błąd pobierania zajętych dat rezerwacji usługi ', error.data.message);
                             } else {
                                 messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                             }
@@ -95,7 +95,7 @@ myApp.controller("bookingController", function ($scope, $timeout, $filter, $root
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd pobierania danych ', error.data.message);
+                        messageHandler.showErrorMessage('Błąd pobierania szczegółów rezerwacji ', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
@@ -125,10 +125,24 @@ myApp.controller("bookingController", function ($scope, $timeout, $filter, $root
                     messageHandler.showSuccessMessage('Dodano pomyślnie');
                     $scope.bookingToSave.bookingDescription = "";
                     $scope.bookingToSave.bookingDate = new Date();
+                    bookingFactory.getDates($scope.serviceData.name, $filter('date')(new Date(), 'yyyy')).then(
+                        function (response) {
+                            notAvailableDates = response.data.list;
+                        },
+                        function (error) {
+                            if (error.data) {
+                                messageHandler.showErrorMessage('Błąd pobierania zajętych dat rezerwacji usługi ', error.data.message);
+                            } else {
+                                messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                            }
+                        });
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                        if (error.data.message.includes('duplicate')) {
+                            error.data.message = ' Usługa jest już zarezerwowana w podanym dniu.';
+                        }
+                        messageHandler.showErrorMessage('Błąd przy tworzeniu rezerwacji ', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
