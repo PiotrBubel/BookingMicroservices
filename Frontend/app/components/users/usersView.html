@@ -92,7 +92,7 @@
                     </div>
                 </div>
 
-                <div class="panel-group">
+                <div class="panel-group" ng-show="!createNew">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <div class="panel-title">
@@ -107,7 +107,7 @@
                                             Może zarządzać usługami:
                                         </div>
                                         <div class="col-md-1 form-group">
-                                            <input type="checkbox" name="canManageServices"
+                                            <input type="checkbox" name="canManageServices" ng-disabled="createNew"
                                                    ng-model="userData.permissions.canManageServices">
                                         </div>
                                     </div>
@@ -116,7 +116,7 @@
                                             Może zarządzać użytkownikami:
                                         </div>
                                         <div class="col-md-1 form-group">
-                                            <input type="checkbox" name="canManageUsers"
+                                            <input type="checkbox" name="canManageUsers" ng-disabled="createNew"
                                                    ng-model="userData.permissions.canManageUsers">
                                         </div>
                                     </div>
@@ -125,7 +125,7 @@
                                             Może zarządzać rezerwacjami:
                                         </div>
                                         <div class="col-md-1 form-group">
-                                            <input type="checkbox" name="canManageBookings"
+                                            <input type="checkbox" name="canManageBookings" ng-disabled="createNew"
                                                    ng-model="userData.permissions.canManageBookings">
                                         </div>
                                     </div>
@@ -150,6 +150,9 @@
                         Usuń
                     </button>
                 </div>
+                <h4><span ng-if="!createNew && userData.login === globalUser.login" class="color-warning">
+                    Uwaga! Edycja własnego konta użytkownika spowoduje wylogowanie
+                </span></h4>
             </form>
             <div class="message-container">
                 <div ng-model="errorMessage" ng-show="showErrorMessage" class="alert alert-danger fade in"><strong>

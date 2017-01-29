@@ -1,6 +1,6 @@
 {
   "mongo_db": "BookingsServiceDB",
-  "mongo_host": "mongodatabase",
+  "mongo_host": "mongoservicesdatabase",
   "mongo_port": 27017,
   "mongo_username": "ServicesDatabaseProxyUser",
   "mongo_password": "BookingsServicep@Ssw0rd"

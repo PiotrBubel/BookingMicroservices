@@ -1,22 +1,28 @@
 version: "2"
 
 services:
-  mongodatabase:
-    image: microservices/mongodatabase:latest
+  mongobookingdatabase:
+    image: microservices/mongobookingdatabase:latest
     volumes:
      - /data/db/bookings:/data/db
+    restart: always
+
+  mongoservicesdatabase:
+    image: microservices/mongoservicesdatabase:latest
+    volumes:
+     - /data/db/services:/data/db
     restart: always
 
   mongobookingdatabaseproxy:
     image: microservices/mongobookingdatabaseproxy:latest
     links:
-      - mongodatabase
+      - mongobookingdatabase
     restart: always
 
   mongoservicesdatabaseproxy:
     image: microservices/mongoservicesdatabaseproxy:latest
     links:
-      - mongodatabase
+      - mongoservicesdatabase
     restart: always
 
   mongousersdatabase:

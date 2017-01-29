@@ -114,58 +114,61 @@ public class AuthService extends AbstractVerticle {
     }
 
     private boolean check(JsonObject userData, String method, JsonObject parameters) {
-
-        switch (ServicesMethods.valueOf(method)) {
-            // services
-            case GET_SERVICES_LIST:
-            case GET_SERVICE_DETAILS:
-            case GET_TAKEN_DATES:
-                return true;
-
-            case DELETE_SERVICE:
-            case SAVE_NEW_SERVICE:
-            case EDIT_SERVICE:
-                return userData.getJsonObject("permissions").getBoolean("canManageServices");
-
-            // bookings
-            case SAVE_NEW_BOOKING:
-                return true;
-
-            case DELETE_BOOKING:
-            case EDIT_BOOKING:
-                return userData.getJsonObject("permissions").getBoolean("canManageBookings");
-
-            case GET_BOOKINGS_LIST:
-                if (userData.getJsonObject("permissions").getBoolean("canManageBookings")) {
+        try {
+            switch (ServicesMethods.valueOf(method)) {
+                // services
+                case GET_SERVICES_LIST:
+                case GET_SERVICE_DETAILS:
+                case GET_TAKEN_DATES:
                     return true;
-                } else if (parameters != null && parameters.containsKey("login")) {
-                    return userData.getString("login").equals(parameters.getString("login"));
-                } else {
-                    return false;
-                }
-            case GET_BOOKING_DETAILS:
-                return true;
 
-            // users
-            case SAVE_NEW_USER:
-                return true;
+                case DELETE_SERVICE:
+                case SAVE_NEW_SERVICE:
+                case EDIT_SERVICE:
+                    return userData.getJsonObject("permissions").getBoolean("canManageServices");
 
-            case DELETE_USER:
-            case GET_USERS_LIST:
-            case EDIT_USER:
-                return userData.getJsonObject("permissions").getBoolean("canManageUsers");
+                // bookings
+                case DELETE_BOOKING:
+                case EDIT_BOOKING:
+                    return userData.getJsonObject("permissions").getBoolean("canManageBookings");
 
-            case GET_USER_DETAILS:
-                if (userData.getJsonObject("permissions").getBoolean("canManageUsers")) {
+                case GET_BOOKINGS_LIST:
+                case SAVE_NEW_BOOKING:
+                    if (userData.getJsonObject("permissions").getBoolean("canManageBookings")) {
+                        return true;
+                    } else if (parameters != null && parameters.containsKey("login")) {
+                        return userData.getString("login").equals(parameters.getString("login"));
+                    } else {
+                        return false;
+                    }
+
+                case GET_BOOKING_DETAILS:
                     return true;
-                } else if (parameters != null && parameters.containsKey("login")) {
-                    return userData.getString("login").equals(parameters.getString("login"));
-                } else {
-                    return false;
-                }
 
-            default:
-                return false;
+                // users
+                case SAVE_NEW_USER:
+                    return true;
+
+                case DELETE_USER:
+                case GET_USERS_LIST:
+                case EDIT_USER:
+                    return userData.getJsonObject("permissions").getBoolean("canManageUsers");
+
+                case GET_USER_DETAILS:
+                    if (userData.getJsonObject("permissions").getBoolean("canManageUsers")) {
+                        return true;
+                    } else if (parameters != null && parameters.containsKey("login")) {
+                        return userData.getString("login").equals(parameters.getString("login"));
+                    } else {
+                        return false;
+                    }
+
+                default:
+                    return false;
+            }
+        } catch (Exception e) {
+            log.warn("Exception when checking auth request: " + e.getMessage());
+            return false;
         }
     }
 

@@ -119,6 +119,11 @@ public class UsersManagement extends AbstractVerticle {
             inMessage.fail(400, "Bad Request. Fields 'login' is required.");
             return;
         }
+        newUser.remove("permissions");
+        newUser.put("permissions", new JsonObject()
+                .put("canManageUsers", false)
+                .put("canManageServices", false)
+                .put("canManageBookings", false));
         Utils.addCreatedDate(newUser);
         eventBus.send(DATABASE_USERS_PROXY_SERVICE_ADDRESS, newUser,
                 new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "SAVE_NEW_USER_IN_DATABASE"),

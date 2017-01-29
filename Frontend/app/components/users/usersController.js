@@ -1,6 +1,6 @@
 'use strict';
 
-myApp.controller("usersController", function ($scope, $timeout, usersFactory, $rootScope) {
+myApp.controller("usersController", function ($scope, $timeout, usersFactory, $rootScope, $location, $cookies) {
 
     $scope.canManageUsers = $rootScope.globalUser && $rootScope.globalUser.permissions && $rootScope.globalUser.permissions.canManageUsers;
 
@@ -61,7 +61,7 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory, $r
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd pobierania danych ', error.data.message);
+                        messageHandler.showErrorMessage('Błąd pobierania listy użytkowników ', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
@@ -78,7 +78,7 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory, $r
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd pobierania danych', error.data.message);
+                        messageHandler.showErrorMessage('Błąd pobierania szczegółów konta użytkownika', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
@@ -106,7 +106,10 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory, $r
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                        if (error.data.message.includes('duplicate')) {
+                            error.data.message = ' Użytkownik o podanym loginie już istnieje';
+                        }
+                        messageHandler.showErrorMessage('Błąd podczas tworzenia konta użytkownika ', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
@@ -123,7 +126,7 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory, $r
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                        messageHandler.showErrorMessage('Błąd podczas usuwania konta użytkownika ', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
@@ -136,13 +139,24 @@ myApp.controller("usersController", function ($scope, $timeout, usersFactory, $r
         usersFactory.edit($scope.userData.login, newData)
             .then(
                 function () {
-                    messageHandler.showSuccessMessage('Edytowano pomyślnie');
-                    refreshList();
-                    $scope.changeSelected($scope.userData.login);
+                    if ($scope.userData.login === $rootScope.globalUser.login) {
+                        messageHandler.showSuccessMessage('Edytowano pomyślnie, zostaniesz wylogowany');
+                        $timeout(function () {
+                            $cookies.remove('user');
+                            $cookies.remove('token');
+                            delete($rootScope.globalUser);
+                            delete($rootScope.token);
+                            $location.path('/login');
+                        }, 3000);
+                    } else {
+                        messageHandler.showSuccessMessage('Edytowano pomyślnie');
+                        refreshList();
+                        $scope.changeSelected($scope.userData.login);
+                    }
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                        messageHandler.showErrorMessage('Błąd podczas edycji konta użytkownika ', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }

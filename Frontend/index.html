@@ -22,12 +22,14 @@
                     <span class="icon-bar"></span>
                 </button>
                 <!--<a class="navbar-brand"><img src="/assets/img/logo.png" alt="logo"/></a>-->
-                <a class="navbar-brand" aria-selected="true" ng-href="#!/main">Booking Microservices</a>
+                <a class="navbar-brand" ng-if="!globalUser.login" aria-selected="true" ng-href="#!/login">Booking Microservices</a>
+                <a class="navbar-brand" ng-if="globalUser.login" aria-selected="true" ng-href="#!/account">Booking Microservices</a>
             </div>
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li><a ng-href="#!/services">Usługi</a></li>
-                    <li ng-if="globalUser.login"><a ng-href="#!/bookings">Rezerwacje</a></li>
+                    <li ng-if="globalUser.login"><a ng-href="#!/bookings">Tworzenie rezerwacji</a></li>
+                    <li ng-if="globalUser.permissions.canManageBookings"><a ng-href="#!/bookingsManagement">Rezerwacje</a></li>
                     <li ng-if="globalUser.permissions.canManageUsers"><a ng-href="#!/users">Użytkownicy</a></li>
                     <li ng-if="globalUser.login"><a ng-href="#!/account">Moje konto</a></li>
                 </ul>
@@ -81,6 +83,7 @@
 <script src="/app/components/login/loginController.js"></script>
 <script src="/app/components/account/accountController.js"></script>
 <script src="/app/components/booking/bookingController.js"></script>
+<script src="/app/components/booking/bookingManagementController.js"></script>
 
 </body>
 </html>

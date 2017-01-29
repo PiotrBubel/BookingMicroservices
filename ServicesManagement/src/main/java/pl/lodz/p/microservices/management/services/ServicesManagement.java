@@ -87,7 +87,7 @@ public class ServicesManagement extends AbstractVerticle {
         }
 
         eventBus.send(DATABASE_SERVICES_PROXY_SERVICE_ADDRESS, inMessage.body(),
-                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_AVAILABLE_DATES_FROM_DATABASE"),
+                new DeliveryOptions().setSendTimeout(TIMEOUT).addHeader(METHOD_KEY, "GET_SERVICE_DETAILS_FROM_DATABASE"),
                 (AsyncResult<Message<JsonObject>> response) -> {
                     if (response.succeeded()) {
                         inMessage.reply(response.result().body());

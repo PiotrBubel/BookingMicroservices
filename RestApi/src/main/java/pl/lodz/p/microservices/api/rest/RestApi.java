@@ -7,6 +7,7 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.ReplyException;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -81,14 +82,14 @@ public class RestApi extends AbstractVerticle {
         router.post(SERVICES_ENDPOINT).handler(context -> requestHandler(context,
                 ServicesManagementMethods.SAVE_NEW_SERVICE,
                 SERVICES_MANAGEMENT_SERVICE_ADDRESS,
-                context.getBodyAsJson(),
+                parseBodyToJson(context.getBodyAsString()),
                 true));
 
         router.put(SERVICES_ENDPOINT + "/:name").handler(context -> requestHandler(context,
                 ServicesManagementMethods.EDIT_SERVICE,
                 SERVICES_MANAGEMENT_SERVICE_ADDRESS,
-                "login",
-                context.getBodyAsJson(),
+                "name",
+                parseBodyToJson(context.getBodyAsString()),
                 true));
 
         // Users endpoint
@@ -112,21 +113,21 @@ public class RestApi extends AbstractVerticle {
         router.post(USERS_ENDPOINT).handler(context -> requestHandler(context,
                 UsersManagementMethods.SAVE_NEW_USER,
                 USERS_MANAGEMENT_SERVICE_ADDRESS,
-                context.getBodyAsJson(),
+                parseBodyToJson(context.getBodyAsString()),
                 true));
 
         router.put(USERS_ENDPOINT + "/:login").handler(context -> requestHandler(context,
                 UsersManagementMethods.EDIT_USER,
                 USERS_MANAGEMENT_SERVICE_ADDRESS,
                 "login",
-                context.getBodyAsJson(),
+                parseBodyToJson(context.getBodyAsString()),
                 true));
 
         // Auth endpoint
         router.post(AUTHENTICATE_ENDPOINT).handler(context -> requestHandler(context,
                 AuthServiceMethods.LOGIN,
                 AUTH_SERVICE_ADDRESS,
-                context.getBodyAsJson(),
+                parseBodyToJson(context.getBodyAsString()),
                 false));
 
         // Booking endpoint
@@ -158,15 +159,15 @@ public class RestApi extends AbstractVerticle {
         router.post(BOOKING_ENDPOINT).handler(context -> requestHandler(context,
                 BookingManagementMethods.SAVE_NEW_BOOKING,
                 BOOKINGS_MANAGEMENT_SERVICE_ADDRESS,
-                context.getBodyAsJson(),
+                parseBodyToJson(context.getBodyAsString()),
                 true));
 
-        router.put(BOOKING_ENDPOINT + "/:id").handler(context -> requestHandler(context,
-                BookingManagementMethods.EDIT_BOOKING,
-                BOOKINGS_MANAGEMENT_SERVICE_ADDRESS,
-                "id",
-                context.getBodyAsJson(),
-                true));
+//        router.put(BOOKING_ENDPOINT + "/:id").handler(context -> requestHandler(context,
+//                BookingManagementMethods.EDIT_BOOKING,
+//                BOOKINGS_MANAGEMENT_SERVICE_ADDRESS,
+//                "id",
+//                parseBodyToJson(context.getBodyAsString()),
+//                true));
 
         vertx.createHttpServer().requestHandler(router::accept).listen(8094);
     }
@@ -206,8 +207,28 @@ public class RestApi extends AbstractVerticle {
         requestHandler(context, method, address, new JsonObject(), permissionCheck);
     }
 
+    private JsonObject parseBodyToJson(String body) {
+        JsonObject bodyAsJson = null;
+        try {
+            bodyAsJson = new JsonObject(body);
+        } catch (DecodeException e) {
+            log.error("Error when parsing body: " + e.getMessage());
+        }
+        return bodyAsJson;
+    }
+
     private void requestHandler(RoutingContext context, Enum method, String address, JsonObject body, boolean permissionCheck) {
-        log.info("Passing request to start method: " + method.name() + " to microservice: " + address);
+        String logInfo = "Passing request to start method: " + method.name() + " to microservice: " + address;
+        if (permissionCheck) {
+            logInfo += " with permission check first.";
+        }
+        log.info(logInfo);
+        if (body != null) {
+            log.info("Incoming message: " + body.encodePrettily());
+        } else {
+            body = new JsonObject();
+            log.info("Without message.");
+        }
 
         final DeliveryOptions options = new DeliveryOptions()
                 .setSendTimeout(3500)
@@ -225,6 +246,9 @@ public class RestApi extends AbstractVerticle {
         if (jsonMessage.containsKey("login")) {
             parameters.put("login", jsonMessage.getString("login"));
             // parameters to sent to auth service can be added when needed
+        }
+        if (jsonMessage.containsKey("booking") && jsonMessage.getJsonObject("booking").containsKey("userLogin")){
+            parameters.put("login", jsonMessage.getJsonObject("booking").getString("userLogin"));
         }
         JsonObject message = new JsonObject().put("token", routingContext.request().getHeader("Auth-Token"))
                 .put("method", method)
@@ -258,12 +282,17 @@ public class RestApi extends AbstractVerticle {
                         respond(routingContext, 500, "Internal server error. Server does not respond with application/json");
                         return;
                     }
+                    String logInfo = "Responding with ";
                     if (resultBody.containsKey("code")) {
                         routingContext.response().setStatusCode(resultBody.getInteger("code"));
+                        logInfo += resultBody.getInteger("code") + " ";
                     }
                     if (resultBody.containsKey("message")) {
                         routingContext.response().setStatusMessage(resultBody.getString("message"));
+                        logInfo += resultBody.getString("message");
                     }
+                    logInfo += " " + resultBody.encodePrettily();
+                    log.info(logInfo);
                     routingContext.response()
                             .putHeader("Content-Type", MediaType.JSON_UTF_8.toString())
                             .end(resultBody.encodePrettily());
@@ -274,6 +303,7 @@ public class RestApi extends AbstractVerticle {
         if (code < 1) {
             code = 500;
         }
+        log.info("Responding with: " + code + " " + message);
         routingContext.response()
                 .putHeader("Content-Type", MediaType.JSON_UTF_8.toString())
                 .setStatusCode(code)

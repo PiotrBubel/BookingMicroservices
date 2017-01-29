@@ -9,10 +9,11 @@
     <name>MicroservicesBookingServices</name>
 
     <modules>
-        <module>MongoDatabase</module>
-        <module>MongoServicesDatabaseProxy</module>
-        <module>MongoBookingDatabaseProxy</module>
+        <module>MongoBookingDatabase</module>
+        <module>MongoServicesDatabase</module>
         <module>MongoUsersDatabase</module>
+        <module>MongoBookingDatabaseProxy</module>
+        <module>MongoServicesDatabaseProxy</module>
         <module>MongoUsersDatabaseProxy</module>
         <module>ServicesManagement</module>
         <module>UsersManagement</module>

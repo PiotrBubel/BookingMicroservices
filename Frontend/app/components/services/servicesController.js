@@ -8,12 +8,7 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
     $scope.services = [];
     $scope.serviceData = {
         description: '',
-        price: 1,
-        timePeriod: 60,
-        maxPeriods: 2
-    };
-    $scope.helper = {
-        wholeDay: true
+        price: 1
     };
 
     var clearData = angular.copy($scope.serviceData);
@@ -67,7 +62,7 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd pobierania danych ', error.data.message);
+                        messageHandler.showErrorMessage('Błąd pobierania listy usług ', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
@@ -81,12 +76,11 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
                 function (response) {
                     $scope.serviceData = response.data;
                     rawData = response.data;
-                    $scope.helper.wholeDay = ($scope.serviceData.maxPeriods * $scope.serviceData.timePeriod === 60 * 24);
                     $scope.createNew = false;
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd pobierania danych ', error.data.message);
+                        messageHandler.showErrorMessage('Błąd pobierania szczegółów usługi ', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
@@ -110,7 +104,10 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                        if (error.data.message.includes('duplicate')) {
+                            error.data.message = ' Usługa o podanej nazwie już istnieje';
+                        }
+                        messageHandler.showErrorMessage('Błąd przy tworzeniu usługi', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
@@ -127,7 +124,7 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                        messageHandler.showErrorMessage('Błąd przy usuwaniu usługi ', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
@@ -146,25 +143,11 @@ myApp.controller("servicesController", function ($scope, $timeout, servicesFacto
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                        messageHandler.showErrorMessage('Błąd podczas edycji usługi', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
                 });
-    };
-
-    $scope.changeWholeDay = function (wholeDay) {
-        if (wholeDay) {
-            $scope.serviceData.maxPeriods = 1;
-            $scope.serviceData.timePeriod = 60 * 24;
-        } else {
-            $scope.serviceData.maxPeriods = rawData.maxPeriods;
-            if (rawData.timePeriod >= 60 * 24) {
-                $scope.serviceData.timePeriod = (60 * 24) - 1;
-            } else {
-                $scope.serviceData.timePeriod = rawData.timePeriod;
-            }
-        }
     };
 
     $scope.exists = function (givenObject) {

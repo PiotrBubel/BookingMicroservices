@@ -44,7 +44,10 @@ myApp.controller("loginController", function ($scope, $timeout, usersFactory, lo
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                        if (error.data.message.includes('duplicate')) {
+                            error.data.message = ' Użytkownik o podanym loginie już istnieje';
+                        }
+                        messageHandler.showErrorMessage('Błąd przy tworzeniu użytkownika ', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }
@@ -66,7 +69,7 @@ myApp.controller("loginController", function ($scope, $timeout, usersFactory, lo
                             },
                             function (error) {
                                 if (error.data) {
-                                    messageHandler.showErrorMessage('Błąd ', error.data.message);
+                                    messageHandler.showErrorMessage('Błąd podczas pobierania szczegółów użytkownika', error.data.message);
                                 } else {
                                     messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                                 }
@@ -75,7 +78,10 @@ myApp.controller("loginController", function ($scope, $timeout, usersFactory, lo
                 },
                 function (error) {
                     if (error.data) {
-                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                        if (error.data.message.includes('No user with login') || error.data.message.includes('Wrong credentials.')) {
+                            error.data.message = ' Podano zły login lub hasło';
+                        }
+                        messageHandler.showErrorMessage('Błąd podczas logowania', error.data.message);
                     } else {
                         messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
                     }

@@ -1,5 +1,124 @@
 <div class="row">
-    <div class="col-md-12">
+        <div class="col-md-12" ng-if="!userLoggedIn">
+            <h3><span class="color-warning">Nie masz odpowiednich uprawnień</span></h3>
+        </div>
+        <div class="col-md-12" ng-if="userLoggedIn">
+
+            <div class="col-md-4">
+                <h4 class="form-header">Utworzone rezerwacje:</h4>
+                <div class="list-group">
+                    <div ng-repeat="booking in bookings">
+                        <a ng-click="getBooking(booking.id)" class="list-group-item"
+                           ng-class="(booking.id == selected.id) ? 'active' : ''">
+                            {{ booking.date + ' ' + booking.serviceName}}
+                        </a>
+                    </div>
+                    <a class="list-group-item list-group-item-success" ng-href="#!/bookings">
+                        -- nowa --
+                    </a>
+                </div>
+            </div>
+
+        <div class="col-md-8 container">
+            <h4 class="form-header">Dane użytkownika:</h4>
+            <div class="row">
+                <div class="col-md-4">
+                    Login:
+                </div>
+                <div class="col-md-8">
+                    {{userData.login}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    Imię:
+                </div>
+                <div class="col-md-8">
+                    {{userData.firstName}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    Nazwisko:
+                </div>
+                <div class="col-md-8">
+                    {{userData.lastName}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    Data założenia konta:
+                </div>
+                <div class="col-md-8">
+                    {{userData.createdDate}}
+                </div>
+            </div>
+            <div ng-if="userData.permissions.canManageUsers || userData.permissions.canManageBookings || userData.permissions.canManageServices" class="row">
+                <div class="col-md-4">
+                    Administrator:
+                </div>
+                <div class="col-md-8">
+                    <div ng-if="userData.permissions.canManageUsers">użytkowników </div>
+                    <div ng-if="userData.permissions.canManageBookings">rezerwacji </div>
+                    <div ng-if="userData.permissions.canManageServices">usług </div>
+                </div>
+            </div>
+
+            <br>
+            <h4 class="form-header">Szczegóły rezerwacji:</h4>
+            <div class="row">
+                <div class="col-md-4">
+                    Data rezerwacji:
+                </div>
+                <div class="col-md-8">
+                    {{selected.date}}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    Nazwa usługi:
+                </div>
+                <div class="col-md-8">
+                    {{selected.serviceName}}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    Data utworzenia:
+                </div>
+                <div class="col-md-8">
+                    {{selected.createdDate}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    Opis rezerwacji:
+                </div>
+                <div class="col-md-8">
+                    <textarea class="multiline-text-from-textarea not-resizable col-md-12" name="description"
+                              ng-model="selected.description" disabled></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    Cena:
+                </div>
+                <div class="col-md-8">
+                    {{selected.service.price}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    Opis usługi:
+                </div>
+                <div class="col-md-8">
+                    <textarea class="multiline-text-from-textarea not-resizable col-md-12" name="serviceSescription"
+                              ng-model="selected.service.description" disabled></textarea>
+                </div>
+            </div>
+        </div>
 
     </div>
 </div>
