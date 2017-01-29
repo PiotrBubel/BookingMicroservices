@@ -1,6 +1,6 @@
 'use strict';
 
-myApp.controller("bookingController", function ($scope, $timeout, $rootScope, servicesFactory, bookingFactory) {
+myApp.controller("bookingController", function ($scope, $timeout, $filter, $rootScope, servicesFactory, bookingFactory) {
 
 
     $scope.userLoggedIn = $rootScope.globalUser && $rootScope.globalUser.login;
@@ -12,19 +12,15 @@ myApp.controller("bookingController", function ($scope, $timeout, $rootScope, se
     $scope.serviceData = {
         name: '',
         description: '',
-        price: 1,
-        timePeriod: 60,
-        maxPeriods: 2
+        price: 1
     };
     $scope.services = [];
-    $scope.helper = {
-        wholeDay: false
+    $scope.bookingToSave = {
+        bookingDate: new Date(),
+        bookingDescription: ''
     };
-    $scope.bookingDate = new Date();
     $scope.minDate = new Date();
-
-    var clearData = angular.copy($scope.serviceData);
-    var rawData = angular.copy($scope.serviceData);
+    var notAvailableDates = [];
 
     var messageHandler = {};
     messageHandler.showErrorMessage = function (message, description) {
@@ -85,9 +81,17 @@ myApp.controller("bookingController", function ($scope, $timeout, $rootScope, se
             .then(
                 function (response) {
                     $scope.serviceData = response.data;
-                    rawData = response.data;
-                    $scope.helper.wholeDay = ($scope.serviceData.maxPeriods * $scope.serviceData.timePeriod === 60 * 24);
-                    $scope.createNew = false;
+                    bookingFactory.getDates($scope.serviceData.name, $filter('date')(new Date(), 'yyyy')).then(
+                        function (response) {
+                            notAvailableDates = response.data.list;
+                        },
+                        function (error) {
+                            if (error.data) {
+                                messageHandler.showErrorMessage('Błąd pobierania danych ', error.data.message);
+                            } else {
+                                messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                            }
+                        });
                 },
                 function (error) {
                     if (error.data) {
@@ -97,4 +101,37 @@ myApp.controller("bookingController", function ($scope, $timeout, $rootScope, se
                     }
                 });
     };
+
+    $scope.dateFilter = function (date) {
+        var stringDate = $filter('date')(date, 'yyyy-MM-dd');
+        for (var i = 0; i < notAvailableDates.length; i++) {
+            if (stringDate === notAvailableDates[i]) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    $scope.saveBooking = function () {
+        var bookingToSave = {
+            userLogin: $scope.userLogin,
+            serviceName: $scope.serviceData.name,
+            date: $filter('date')($scope.bookingToSave.bookingDate, 'yyyy-MM-dd'),
+            description: $scope.bookingToSave.bookingDescription
+        };
+        bookingFactory.create(bookingToSave)
+            .then(
+                function () {
+                    messageHandler.showSuccessMessage('Dodano pomyślnie');
+                    $scope.bookingToSave.bookingDescription = "";
+                    $scope.bookingToSave.bookingDate = new Date();
+                },
+                function (error) {
+                    if (error.data) {
+                        messageHandler.showErrorMessage('Błąd ', error.data.message);
+                    } else {
+                        messageHandler.showErrorMessage('Błąd ', "Brak połączenia z API");
+                    }
+                });
+    }
 });

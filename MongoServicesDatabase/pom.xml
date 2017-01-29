@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>pl.lodz.p.microservices</groupId>
-    <artifactId>MongoDatabase</artifactId>
+    <artifactId>MongoServicesDatabase</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>MongoDatabaseService</name>
+    <name>MongoServicesDatabaseService</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

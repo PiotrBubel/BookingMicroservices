@@ -1,0 +1,172 @@
+<div class="row">
+    <div class="col-md-12" ng-if="!userLoggedIn || !canManageBookings">
+        <h3><span class="color-warning">Nie masz odpowiednich uprawnień</span></h3>
+    </div>
+
+
+    <div class="col-md-5">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="panel-title">
+                        <a data-toggle="collapse" data-target="#search">Wyszukiwanie</a>
+                    </div>
+                </div>
+                <div id="search" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <div class="container">
+                            <form name="userForm" novalidate>
+                                <div class="row padding-bottom-list">
+                                    <div class="col-md-2">
+                                        Login użytkownika:
+                                    </div>
+                                    <div class="col-md-2 col-sm-10">
+                                        <input class="form-control" type="text" name="lastName"
+                                               title="Login użytkownika"
+                                               ng-model="search.userLogin">
+                                    </div>
+                                </div>
+                                <div class="row padding-bottom-list">
+                                    <div class="col-md-2">
+                                        Data:
+                                    </div>
+                                    <div class="col-md-2 col-sm-10">
+                                        <input class="form-control" type="text" name="date" title="Data"
+                                               ng-model="search.date">
+                                    </div>
+                                </div>
+                                <div class="row padding-bottom-list">
+                                    <div class="col-md-2">
+                                        Nazwa usługi:
+                                    </div>
+                                    <div class="col-md-2 col-sm-10">
+                                        <input class="form-control" type="text" name="serviceName"
+                                               title="Nazwa usługi"
+                                               ng-model="search.serviceName">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="panel-title">
+                        <a data-toggle="collapse" data-target="#info">Informacje szczegółowe</a>
+                    </div>
+                </div>
+                <div id="info" class="panel-collapse collapse">
+                    <div class="panel-body" ng-show="selected && selected.service">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    Login użytkownika:
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    {{selected.userLogin}}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-2">
+                                    Data rezerwacji:
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    {{selected.date}}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-2">
+                                    Nazwa usługi:
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    {{selected.serviceName}}
+                                </div>
+                            </div>
+
+
+
+                            <div class="row">
+                                <div class="col-md-2">
+                                    Data utworzenia:
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    {{selected.createdDate}}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    Opis rezerwacji:
+                                </div>
+                                <div class="col-md-4 form-group">
+                    <textarea class="multiline-text-from-textarea not-resizable col-md-12" name="description"
+                              ng-model="selected.description" disabled></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    Cena:
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    {{selected.service.price}}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    Opis usługi:
+                                </div>
+                                <div class="col-md-4 form-group">
+                    <textarea class="multiline-text-from-textarea not-resizable col-md-12" name="serviceSescription"
+                              ng-model="selected.service.description" disabled></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-3 h4">Login użytkownika</div>
+            <div class="col-md-3 h4">Data</div>
+            <div class="col-md-3 h4">Nazwa usługi</div>
+            <div class="col-md-3"></div>
+        </div>
+        <div ng-repeat="booking in bookings | filter:search">
+            <div class="col-md-3">{{booking.userLogin}}</div>
+            <div class="col-md-3">{{booking.date}}</div>
+            <div class="col-md-3">{{booking.serviceName}}</div>
+            <div class="col-md-3">
+                <div class="btn-group padding-bottom-list">
+                    <button type="submit" class="btn btn-info" ng-click="getBooking(booking.id)"
+                            ng-disabled="booking.id === selected.id">
+                        Pobierz szczegóły
+                    </button>
+                    <button type="submit" class="btn btn-warning" ng-click="removeBooking(booking.id)">
+                        Usuń
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="message-container">
+                <div ng-model="errorMessage" ng-show="showErrorMessage" class="alert alert-danger fade in">
+                    <strong>{{ errorMessage }}</strong> {{ errorDescription }}
+                </div>
+                <div ng-model="successMessage" ng-show="showSuccessMessage" class="alert alert-success fade in">
+                    <strong>{{ successMessage }}</strong> {{ successDescription }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

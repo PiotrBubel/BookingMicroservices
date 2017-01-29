@@ -6,5 +6,5 @@ myApp.factory("loginFactory", function ($http, appConfig) {
         login: function (login, password) {
             return $http.post(appConfig.apiAddress + '/authenticate', {login: login, password: password});
         }
-    };
+    }
 });

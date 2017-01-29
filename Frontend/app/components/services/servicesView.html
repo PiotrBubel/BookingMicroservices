@@ -36,7 +36,7 @@
                 </div>
                 <div class="row">
                     <div class="col-md-4">
-                        Cena usługi (PLN/jednostka):
+                        Cena usługi (PLN/dzień):
                     </div>
                     <div class="col-md-8 form-group"
                          ng-class="{ 'has-error': serviceForm.price.$error.required && serviceForm.price.$dirty }">
@@ -46,45 +46,6 @@
                              ng-show="serviceForm.price.$error.required && serviceForm.price.$dirty">
                             Pole jest wymagane
                         </div>
-                    </div>
-                </div>
-                <div class="row" ng-show="!helper.wholeDay">
-                    <div class="col-md-4">
-                        Czas jednostkowy [min]:
-                    </div>
-                    <div class="col-md-8 form-group"
-                         ng-class="{ 'has-error': serviceForm.timePeriod.$error.required && serviceForm.timePeriod.$dirty }">
-                        <input class="form-control" type="number" name="timePeriod"
-                               ng-model="serviceData.timePeriod" min="30" max="{{60*24}}"
-                               ng-required="!helper.wholeDay">
-                        <div class="color-warning"
-                             ng-show="serviceForm.timePeriod.$error.required && serviceForm.timePeriod.$dirty">
-                            Pole jest wymagane
-                        </div>
-                    </div>
-                </div>
-                <div class="row" ng-show="!helper.wholeDay">
-                    <div class="col-md-4">
-                        Maksymalna ilość jednostek:
-                    </div>
-                    <div class="col-md-8 form-group"
-                         ng-class="{ 'has-error': serviceForm.maxPeriods.$error.required && serviceForm.maxPeriods.$dirty }">
-                        <input class="form-control" type="number" name="maxPeriods"
-                               ng-model="serviceData.maxPeriods" min="1" max="{{60*24 / serviceData.timePeriod}}"
-                               ng-required="!helper.wholeDay">
-                        <div class="color-warning"
-                             ng-show="serviceForm.maxPeriods.$error.required && serviceForm.maxPeriods.$dirty">
-                            Pole jest wymagane
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        Usługa całodobowa:
-                    </div>
-                    <div class="col-md-1 form-group">
-                        <input type="checkbox" name="wholeDay" disabled
-                               ng-model="helper.wholeDay" ng-change="changeWholeDay(helper.wholeDay)">
                     </div>
                 </div>
                 <div class="row">
@@ -135,39 +96,17 @@
                     Opis usługi:
                 </div>
                 <div class="col-md-8">
-                    {{ serviceData.description }}
+                    <textarea class="multiline-text-from-textarea not-resizable col-md-12" name="Service description"
+                              ng-model="serviceData.description" disabled></textarea>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4">
-                    Cena usługi:
+                    Cena usługi (PLN/dzień):
                 </div>
                 <div class="col-md-8">
                     {{ serviceData.price + 'PLN' }}
                     <span ng-if="!helper.wholeDay">{{ '/ ' + serviceData.timePeriod + 'min' }}</span>
-                </div>
-            </div>
-            <div ng-if="!helper.wholeDay">
-                <div class="row">
-                    <div class="col-md-4">
-                        Czas jednostkowy:
-                    </div>
-                    <div class="col-md-8">
-                        {{ serviceData.timePeriod + 'min' }}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        Maksymalny czas:
-                    </div>
-                    <div class="col-md-8">
-                        {{ serviceData.maxPeriods * serviceData.timePeriod + 'min'}}
-                    </div>
-                </div>
-            </div>
-            <div ng-if="helper.wholeDay" class="row">
-                <div class="col-md-4">
-                    Usługa całodobowa
                 </div>
             </div>
         </div>

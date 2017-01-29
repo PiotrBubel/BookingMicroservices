@@ -160,10 +160,14 @@ public class BookingManagement extends AbstractVerticle {
             log.error("Received SAVE_NEW_BOOKING command without service name");
             inMessage.fail(400, "Bad Request. Field 'serviceName' is required.");
             return;
-        } if (!newBooking.containsKey("date") ||
+        } else if (!newBooking.containsKey("date") ||
                 StringUtils.isBlank(newBooking.getString("date"))) {
             log.error("Received SAVE_NEW_BOOKING command without date");
             inMessage.fail(400, "Bad Request. Field 'date' is required.");
+            return;
+        } else if (!newBooking.getString("date").matches("\\d{4}-\\d{2}-\\d{2}")){
+            log.error("Received SAVE_NEW_BOOKING command without valid date");
+            inMessage.fail(400, "Bad Request. Field 'date' is invalid it should be in format yyyy-mm-dd.");
             return;
         }
 

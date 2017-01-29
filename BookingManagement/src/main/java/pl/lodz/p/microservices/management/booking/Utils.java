@@ -2,6 +2,8 @@ package pl.lodz.p.microservices.management.booking;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -10,6 +12,7 @@ import java.util.Date;
  * Utils class for Bookings Management Service
  */
 public class Utils {
+    private static final Logger log = LoggerFactory.getLogger(BookingManagement.class);
 
     /**
      * Method adds current date to given Json
@@ -36,8 +39,22 @@ public class Utils {
         for (int i = 0; i < given.size(); i++) {
             JsonObject changed = given.getJsonObject(i).copy();
             changed.remove("_id");
-            changed.put("id", given.getJsonObject(i).getJsonObject("_id").getString("$oid"));
-            result.getJsonArray("list").add(changed);
+            String id = "";
+            try {
+                id = given.getJsonObject(i).getString("_id");
+            } catch (Exception e1) {
+                try {
+                    id = given.getJsonObject(i).getJsonObject("_id").getString("$oid");
+                } catch (Exception e2) {
+                    log.error("Error when parsing data, object given: " + object.encodePrettily());
+                    log.error("Error when parsing data, message: " + e2.getMessage());
+                }
+
+            }
+            changed.put("id", id);
+            if (!id.equals("")) {
+                result.getJsonArray("list").add(changed);
+            }
         }
         return result;
     }

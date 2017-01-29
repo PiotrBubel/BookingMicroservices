@@ -27,7 +27,8 @@
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li><a ng-href="#!/services">Usługi</a></li>
-                    <li ng-if="globalUser.login"><a ng-href="#!/bookings">Rezerwacje</a></li>
+                    <li ng-if="globalUser.login"><a ng-href="#!/bookings">Tworzenie rezerwacji</a></li>
+                    <li ng-if="globalUser.permissions.canManageBookings"><a ng-href="#!/bookingsManagement">Rezerwacje</a></li>
                     <li ng-if="globalUser.permissions.canManageUsers"><a ng-href="#!/users">Użytkownicy</a></li>
                     <li ng-if="globalUser.login"><a ng-href="#!/account">Moje konto</a></li>
                 </ul>
@@ -81,6 +82,7 @@
 <script src="/app/components/login/loginController.js"></script>
 <script src="/app/components/account/accountController.js"></script>
 <script src="/app/components/booking/bookingController.js"></script>
+<script src="/app/components/booking/bookingManagementController.js"></script>
 
 </body>
 </html>

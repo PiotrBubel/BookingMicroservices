@@ -12,7 +12,10 @@ var myApp = angular.module('myApp', ['ngRoute', 'ngMessages', 'ngCookies', 'ngMa
                 templateUrl: '/app/components/services/servicesView.html'
             }).when('/bookings', {
                 controller: 'bookingController',
-                templateUrl: '/app/components/booking/bookingView.html'
+                templateUrl: '/app/components/booking/bookingCreateView.html'
+            }).when('/bookingsManagement', {
+                controller: 'bookingManagementController',
+                templateUrl: '/app/components/booking/bookingManagementView.html'
             }).when('/users', {
                 controller: 'usersController',
                 templateUrl: '/app/components/users/usersView.html'
@@ -28,7 +31,7 @@ var myApp = angular.module('myApp', ['ngRoute', 'ngMessages', 'ngCookies', 'ngMa
             $locationProvider.html5Mode(false).hashPrefix('!');
         }]);
 
-myApp.controller("navbarController", function ($http, $scope, $cookies, $location, $rootScope) {
+myApp.controller("navbarController", function ($http, $scope, $cookies, $location, $rootScope, loginFactory) {
     $rootScope.globalUser = $cookies.getObject('user');
     $rootScope.token = $cookies.getObject('token');
 

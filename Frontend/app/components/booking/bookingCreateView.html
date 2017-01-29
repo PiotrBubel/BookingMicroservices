@@ -1,0 +1,108 @@
+<div class="row">
+    <div class="col-md-12" ng-if="!userLoggedIn">
+        <h3><span class="color-warning">Nie masz odpowiednich uprawnień</span></h3>
+    </div>
+    <div ng-if="userLoggedIn">
+
+        <div class="col-md-4">
+            <h4 class="form-header">Dostępne usługi:</h4>
+            <div class="list-group">
+                <div ng-repeat="name in services">
+                    <a ng-click="changeSelected(name)" class="list-group-item"
+                       ng-class="(name==serviceData.name) ? 'active' : ''">
+                        {{ name }}
+                    </a>
+                </div>
+                <a ng-if="canManageServices" class="list-group-item list-group-item-success" ng-click="setNew()">
+                    -- nowa --
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h4 class="form-header">Zarezerwuj usługę {{ serviceData.name }}</h4>
+            <div class="row">
+                <div class="col-md-4">
+                    Notatka do rezerwacji:
+                </div>
+                <div class="col-md-8 form-group"
+                     ng-class="{ 'has-error': serviceForm.description.$error.required && serviceForm.description.$dirty }">
+                        <textarea class="form-control not-resizable" rows="5" name="description"
+                                  ng-model="bookingToSave.bookingDescription"
+                                  ng-required="false"></textarea>
+                    <div class="color-warning"
+                         ng-show="serviceForm.description.$error.required && serviceForm.description.$dirty">
+                        Pole jest wymagane
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 padding-top">
+                    Data rezerwacji:
+                </div>
+                <div class="col-md-8 form-group">
+                    <div class="row">
+                        <md-input-container aria-label="Date">
+                            <md-datepicker ng-model="bookingToSave.bookingDate" min-date="minDate" md-date-filter="dateFilter"></md-datepicker>
+                        </md-input-container>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <a data-toggle="collapse" data-target="#info">
+                                Informacje o usłudze {{ serviceData.name }}</a>
+                        </div>
+                    </div>
+                    <div id="info" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            <div class="container">
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Nazwa usługi:
+                                    </div>
+                                    <div class="col-md-8">
+                                        {{ serviceData.name }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Opis usługi:
+                                    </div>
+                                    <div class="col-md-8">
+                        <textarea class="multiline-text-from-textarea not-resizable col-md-12" name="description"
+                                  ng-model="serviceData.description" disabled></textarea>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Cena usługi:
+                                    </div>
+                                    <div class="col-md-8">
+                                        {{ serviceData.price + ' PLN' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-success" ng-click="saveBooking()">
+                    Zarezerwuj
+                </button>
+            </div>
+            <div class="message-container">
+                <div ng-model="errorMessage" ng-show="showErrorMessage" class="alert alert-danger fade in">
+                    <strong>{{ errorMessage }}</strong> {{ errorDescription }}
+                </div>
+                <div ng-model="successMessage" ng-show="showSuccessMessage" class="alert alert-success fade in">
+                    <strong>{{ successMessage }}</strong> {{ successDescription }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

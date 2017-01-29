@@ -3,7 +3,7 @@
 }
 
 body > .container {
-    padding: 60px 15px 0;
+    padding: 40px 10px;
 }
 
 .container .text-muted {
@@ -28,4 +28,22 @@ body > .container {
 
 .not-resizable {
     resize: none;
+}
+
+.padding-bottom-list {
+    padding-bottom: 5px;
+}
+
+.padding-top {
+    padding-top: 25px;
+}
+
+.multiline-text-from-textarea {
+    background-color: transparent !important;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    cursor: default;
+    padding-left: 0;
+    padding-right: 0;
 }

@@ -55,14 +55,15 @@ class BookingDBManager {
 
     static void getBookingDetails(Message<JsonObject> inMessage, MongoClient mongoClient) {
         String _id = inMessage.body().getString("_id");
-        JsonObject jsonQuery = new JsonObject().put("_id", new JsonObject().put("$oid", _id));
+//        JsonObject jsonQuery = new JsonObject().put("_id", new JsonObject().put("$oid", _id));
+        JsonObject jsonQuery = new JsonObject().put("_id", _id);
         FindOptions options = new FindOptions().setFields(new JsonObject().put("_id", 0));
 
         mongoClient.findWithOptions(COLLECTION_BOOKINGS, jsonQuery, options, response -> {
             if (response.succeeded()) {
                 if (response.result().size() > 0) {
                     JsonObject result = response.result().get(0);
-                    inMessage.reply(result);
+                    inMessage.reply(result.put("id", _id));
                     log.info("Load booking details from database succeeded.");
                 } else {
                     log.info("Load booking details from database not succeeded. No booking with id: " + _id);
@@ -77,7 +78,8 @@ class BookingDBManager {
 
     static void editBooking(Message<JsonObject> inMessage, MongoClient mongoClient) {
         String _id = inMessage.body().getString("_id");
-        JsonObject jsonQuery = new JsonObject().put("_id", new JsonObject().put("$oid", _id));
+//        JsonObject jsonQuery = new JsonObject().put("_id", new JsonObject().put("$oid", _id));
+        JsonObject jsonQuery = new JsonObject().put("_id", _id);
         JsonObject bookingData = inMessage.body().getJsonObject("booking");
         JsonObject update = new JsonObject().put("$set", bookingData);
 
@@ -106,7 +108,7 @@ class BookingDBManager {
     }
 
     static void deleteBooking(Message<JsonObject> inMessage, MongoClient mongoClient) {
-        JsonObject jsonQuery = new JsonObject().put("_id", new JsonObject().put("$oid", inMessage.body().getString("_id")));
+        JsonObject jsonQuery = new JsonObject().put("_id", inMessage.body().getString("_id"));
         mongoClient.removeOne(COLLECTION_BOOKINGS, jsonQuery, response -> {
             if (response.succeeded()) {
                 inMessage.reply(Utils.jsonHttpResponse(204, "No content"));
