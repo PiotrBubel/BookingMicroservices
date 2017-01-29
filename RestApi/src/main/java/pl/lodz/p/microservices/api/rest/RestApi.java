@@ -162,12 +162,12 @@ public class RestApi extends AbstractVerticle {
                 parseBodyToJson(context.getBodyAsString()),
                 true));
 
-        router.put(BOOKING_ENDPOINT + "/:id").handler(context -> requestHandler(context,
-                BookingManagementMethods.EDIT_BOOKING,
-                BOOKINGS_MANAGEMENT_SERVICE_ADDRESS,
-                "id",
-                parseBodyToJson(context.getBodyAsString()),
-                true));
+//        router.put(BOOKING_ENDPOINT + "/:id").handler(context -> requestHandler(context,
+//                BookingManagementMethods.EDIT_BOOKING,
+//                BOOKINGS_MANAGEMENT_SERVICE_ADDRESS,
+//                "id",
+//                parseBodyToJson(context.getBodyAsString()),
+//                true));
 
         vertx.createHttpServer().requestHandler(router::accept).listen(8094);
     }
@@ -246,6 +246,9 @@ public class RestApi extends AbstractVerticle {
         if (jsonMessage.containsKey("login")) {
             parameters.put("login", jsonMessage.getString("login"));
             // parameters to sent to auth service can be added when needed
+        }
+        if (jsonMessage.containsKey("booking") && jsonMessage.getJsonObject("booking").containsKey("userLogin")){
+            parameters.put("login", jsonMessage.getString("userLogin"));
         }
         JsonObject message = new JsonObject().put("token", routingContext.request().getHeader("Auth-Token"))
                 .put("method", method)
