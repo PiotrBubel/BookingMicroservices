@@ -248,7 +248,7 @@ public class RestApi extends AbstractVerticle {
             // parameters to sent to auth service can be added when needed
         }
         if (jsonMessage.containsKey("booking") && jsonMessage.getJsonObject("booking").containsKey("userLogin")){
-            parameters.put("login", jsonMessage.getString("userLogin"));
+            parameters.put("login", jsonMessage.getJsonObject("booking").getString("userLogin"));
         }
         JsonObject message = new JsonObject().put("token", routingContext.request().getHeader("Auth-Token"))
                 .put("method", method)
